@@ -4,7 +4,6 @@
  */
 
 function renderDashboardCharts(data) {
-    // Main hub triggered cleanly by app.js on line 71
     generateViolationsChart(data);
     generateOutcomesChart(data);
 }
@@ -14,30 +13,28 @@ function renderDashboardCharts(data) {
  */
 function generateViolationsChart(data) {
     const containerId = "#chartViolations";
-    
-    // Clear out previous SVG nodes during real-time data filtering cycles
     d3.select(containerId).selectAll("*").remove();
 
-    // Aggregate Fines Issued by Metric/Offence Category
+    // 聚合 fines
     const summary = {};
     data.forEach(item => {
         const key = item.metric.replace(/_/g, ' ');
         summary[key] = (summary[key] || 0) + item.fines;
     });
 
-    const chartData = Object.keys(summary).map(key => ({
+    let chartData = Object.keys(summary).map(key => ({
         metric: key,
         value: summary[key]
     }));
-
     if (chartData.length === 0) return;
 
-    // Dimensions Setup
+    //sort by value descending for better visual impact
+    chartData.sort((a, b) => b.value - a.value);
+
     const width = 550;
     const height = 300;
-    const margin = { top: 20, right: 20, bottom: 65, left: 75 };
+    const margin = { top: 30, right: 20, bottom: 65, left: 75 }; 
 
-    // Inject Responsive SVG Base ViewBox
     const svg = d3.select(containerId)
         .append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`)
@@ -46,19 +43,20 @@ function generateViolationsChart(data) {
         .append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    // X Coordinates (Discrete Scale Band)
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
     const x = d3.scaleBand()
         .domain(chartData.map(d => d.metric))
-        .range([0, width - margin.left - margin.right])
+        .range([0, innerWidth])
         .padding(0.25);
 
-    // Y Coordinates (Linear Scale bounded by calculated max payload values)
     const y = d3.scaleLinear()
         .domain([0, d3.max(chartData, d => d.value) || 100])
         .nice()
-        .range([height - margin.top - margin.bottom, 0]);
+        .range([innerHeight, 0]);
 
-    // Draw Data Bars
+    
     svg.selectAll(".bar")
         .data(chartData)
         .enter()
@@ -67,12 +65,24 @@ function generateViolationsChart(data) {
         .attr("x", d => x(d.metric))
         .attr("width", x.bandwidth())
         .attr("y", d => y(d.value))
-        .attr("height", d => height - margin.top - margin.bottom - y(d.value))
+        .attr("height", d => innerHeight - y(d.value))
         .attr("fill", "#2980b9");
 
-    // Add X-Axis with rotated labels for safety/readability
+    svg.selectAll(".bar-label")
+        .data(chartData)
+        .enter()
+        .append("text")
+        .attr("class", "bar-label")
+        .attr("x", d => x(d.metric) + x.bandwidth() / 2)
+        .attr("y", d => y(d.value) - 5)
+        .attr("text-anchor", "middle")
+        .style("font-size", "10px")
+        .style("fill", "#333")
+        .text(d => d.value.toLocaleString());
+
+    // X axis 
     svg.append("g")
-        .attr("transform", `translate(0, ${height - margin.top - margin.bottom})`)
+        .attr("transform", `translate(0, ${innerHeight})`)
         .call(d3.axisBottom(x))
         .selectAll("text")
         .style("text-anchor", "end")
@@ -80,24 +90,29 @@ function generateViolationsChart(data) {
         .attr("dy", ".15em")
         .attr("transform", "rotate(-30)");
 
-    // Add Y-Axis formatted cleanly with SI prefix notations (e.g., 50k instead of 50000)
+    // Y axis
     svg.append("g")
         .call(d3.axisLeft(y).ticks(6).tickFormat(d3.format("~s")));
+
+    
+    svg.append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", -10)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("font-weight", "bold")
+        .text("Offence Violation Breakdown (sorted)");
 }
 
 /**
- * 2. Enforcement Outcome Comparison Chart (D3 Interactive Donut Layout)
+ * 2. Enforcement Outcome Comparison Chart (D3 Donut Layout)
  */
 function generateOutcomesChart(data) {
     const containerId = "#chartOutcomes";
-    
-    // Reset canvas container
     d3.select(containerId).selectAll("*").remove();
 
-    // Aggregate Arrests and Charges counters
     let totalArrests = 0;
     let totalCharges = 0;
-
     data.forEach(item => {
         totalArrests += item.arrests;
         totalCharges += item.charges;
@@ -108,39 +123,35 @@ function generateOutcomesChart(data) {
         { label: "Charges Filed", value: totalCharges }
     ];
 
-    // Avoid layout break errors if nothing matches the current filter
     if (totalArrests === 0 && totalCharges === 0) return;
 
     const width = 450;
     const height = 300;
     const radius = Math.min(width, height) / 2 - 20;
 
+    // create svg and group for pie chart, with center translation for donut layout
     const svg = d3.select(containerId)
         .append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("width", "100%")
         .attr("height", "100%")
         .append("g")
-        .attr("transform", `translate(${width / 2 - 40}, ${height / 2})`);
+        .attr("transform", `translate(${width / 2 -50}, ${height / 2})`); //adjust the chart position 
 
-    // Dynamic Color Range
     const color = d3.scaleOrdinal()
         .domain(["Arrests Recorded", "Charges Filed"])
         .range(["#e67e22", "#9b59b6"]);
 
-    // Calculate Pie Segment angles
     const pie = d3.pie()
         .value(d => d.value)
         .sort(null);
 
-    // Define Radius Extents (Inner Radius > 0 builds a Donut Chart)
     const arc = d3.arc()
         .innerRadius(radius * 0.55)
         .outerRadius(radius * 0.9);
 
     const arcData = pie(chartData);
 
-    // Append Path Elements
     svg.selectAll("path")
         .data(arcData)
         .enter()
@@ -149,11 +160,10 @@ function generateOutcomesChart(data) {
         .attr("fill", d => color(d.data.label))
         .attr("stroke", "#ffffff")
         .style("stroke-width", "2px");
-
-    // Dynamic Sidebar Chart Legends
-    const legend = d3.select(containerId).find ? d3.select(containerId) : d3.select(containerId).select("svg")
+        
+    const legend = d3.select(containerId).select("svg")
         .append("g")
-        .attr("transform", `translate(${width - 150}, 30)`);
+        .attr("transform", `translate(${width - 170}, 30)`); //adjust the text position
 
     chartData.forEach((d, i) => {
         const legendRow = legend.append("g")

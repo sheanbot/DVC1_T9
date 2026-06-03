@@ -10,35 +10,12 @@
 <body>
 
     <header class="navbar">
-        <div class="logo">Traffic Analytics Portal</div>
-        <nav>
-            <button class="nav-btn active" id="btn-home" onclick="switchView('home')">Overview</button>
-            <button class="nav-btn" id="btn-dashboard" onclick="switchView('dashboard')">Interactive Dashboard</button>
-        </nav>
+        <div class="logo">Traffic Enforcement Dashboard</div>
     </header>
 
     <main class="app-container">
 
-        <section id="home-view" class="view-section">
-            <div class="hero-banner">
-                <h1>Australian Road Safety & Traffic Enforcement Insights</h1>
-                <p>An interactive data exploration platform built to monitor regional distributions of driving offenses, fines, arrests, and citations across Australian jurisdictions.</p>
-                <button class="cta-btn" onclick="switchView('dashboard')">Launch Dashboard</button>
-            </div>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <h3>Comprehensive Offence Profiling</h3>
-                    <p>Track metrics covering mobile phone usage, unlicensed driving, speeding, and seatbelt non-compliance.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Demographic Distributions</h3>
-                    <p>Evaluate traffic violation risk variations mapped across distinct age brackets and remote regional zones.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="dashboard-view" class="view-section" style="display: none;">
+        <section id="dashboard-view" class="view-section" >
             
             <div class="filter-panel">
                 <h2>Dashboard Controls</h2>
@@ -93,7 +70,8 @@
             </div>
 
             <div class="table-wrapper">
-                <h3>Granular Dataset Matrix Overview</h3>
+                <h3>Filtered Data Records</h3>
+                <p class="table-note" id="table-summary">Showing 0 records.</p>
                 <div class="table-scroll">
                     <table id="summaryTable">
                         <thead>

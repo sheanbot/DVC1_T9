@@ -84,11 +84,19 @@ function updateKPICounts(data) {
 
 function populateSummaryTable(data) {
     const tbody = document.getElementById('table-body');
+    const summaryLabel = document.getElementById('table-summary');
     tbody.innerHTML = '';
-    
-    // Cap visual rendering to 100 rows to ensure UI stability and performance
+
+    const totalRows = data.length;
     const displaySubset = data.slice(0, 100);
-    
+    const summaryText = totalRows === 0
+        ? 'No matching records found.'
+        : totalRows > 100
+            ? `Showing first 100 of ${totalRows.toLocaleString()} matching records.`
+            : `Showing all ${totalRows.toLocaleString()} matching records.`;
+
+    summaryLabel.textContent = summaryText;
+
     displaySubset.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
