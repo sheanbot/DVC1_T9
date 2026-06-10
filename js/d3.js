@@ -4,6 +4,7 @@
  */
 
 function renderDashboardCharts(data) {
+    generateLineChart(data);
     generateViolationsChart(data);
     generateOutcomesChart(data);
 }
@@ -181,4 +182,106 @@ function generateOutcomesChart(data) {
             .style("font-family", "sans-serif")
             .text(`${d.label}: ${d.value.toLocaleString()}`);
     });
+}
+
+/**
+ * 3. Annual Fines Trend Line Chart (D3 Temporal Mapping Layout)
+ */
+function generateLineChart(data) {
+    const containerId = "#chartLine";
+    d3.select(containerId).selectAll("*").remove();
+
+    // Aggregate total fines grouping by case year
+    const summary = {};
+    data.forEach(item => {
+        const key = item.year;
+        if (key && key !== 'Unknown') {
+            summary[key] = (summary[key] || 0) + item.fines;
+        }
+    });
+
+    let chartData = Object.keys(summary).map(key => ({
+        year: key,
+        value: summary[key]
+    }));
+    if (chartData.length === 0) return;
+
+    // Arrange years chronologically
+    chartData.sort((a, b) => d3.ascending(a.year, b.year));
+
+    const width = 850;
+    const height = 280;
+    const margin = { top: 30, right: 40, bottom: 40, left: 75 };
+
+    const svg = d3.select(containerId)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const x = d3.scalePoint()
+        .domain(chartData.map(d => d.year))
+        .range([0, innerWidth])
+        .padding(0.2);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(chartData, d => d.value) || 100])
+        .nice()
+        .range([innerHeight, 0]);
+
+    // Trend path stroke line generator
+    const lineGenerator = d3.line()
+        .x(d => x(d.year))
+        .y(d => y(d.value))
+        .curve(d3.curveMonotoneX); // Smooth trajectory intersections
+
+    // Append path geometry layer
+    svg.append("path")
+        .datum(chartData)
+        .attr("fill", "none")
+        .attr("stroke", "#2563eb")
+        .attr("stroke-width", 3)
+        .attr("d", lineGenerator);
+
+    // Interactive coordinate indicator nodes
+    svg.selectAll(".dot")
+        .data(chartData)
+        .enter()
+        .append("circle")
+        .attr("class", "dot")
+        .attr("cx", d => x(d.year))
+        .attr("cy", d => y(d.value))
+        .attr("r", 5)
+        .attr("fill", "#ffffff")
+        .attr("stroke", "#2563eb")
+        .attr("stroke-width", 2);
+
+    // Precise values painted over data intersection nodes
+    svg.selectAll(".line-label")
+        .data(chartData)
+        .enter()
+        .append("text")
+        .attr("class", "line-label")
+        .attr("x", d => x(d.year))
+        .attr("y", d => y(d.value) - 10)
+        .attr("text-anchor", "middle")
+        .style("font-size", "10px")
+        .style("font-weight", "600")
+        .style("fill", "#1e293b")
+        .text(d => d.value.toLocaleString());
+
+    // Coordinate Axes rendering
+    svg.append("g")
+        .attr("transform", `translate(0, ${innerHeight})`)
+        .call(d3.axisBottom(x))
+        .style("font-size", "11px");
+
+    svg.append("g")
+        .call(d3.axisLeft(y).ticks(5).tickFormat(d3.format("~s")))
+        .style("font-size", "11px");
 }

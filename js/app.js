@@ -1,11 +1,28 @@
 let rawDataset = [];
 
+// Handle Page Navigation
 function switchView(viewId) {
-    document.querySelectorAll('.view-section').forEach(view => view.style.display = 'none');
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    // 1. Clear all active classes and reset layout states
+    document.querySelectorAll('.view-section').forEach(view => {
+        view.classList.remove('active');
+        view.style.display = ''; 
+    });
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
     
-    document.getElementById(`${viewId}-view`).style.display = 'block';
+    // 2. Activate selected view section
+    document.getElementById(`${viewId}-view`).classList.add('active');
     document.getElementById(`btn-${viewId}`).classList.add('active');
+
+    // 3. Redraw engine kickstart to prevent hidden 0px container rendering
+    if (viewId === 'dashboard') {
+        setTimeout(() => {
+            if (typeof runDataFilterCycle === "function") {
+                runDataFilterCycle();
+            }
+        }, 50);
+    }
 }
 
 function parseCSVMatrix(text) {
