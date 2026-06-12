@@ -78,7 +78,7 @@ function generateViolationsChart(data) {
         .attr("text-anchor", "middle")
         .attr("dy", "2.2em")
         .style("font-size", "12px")
-        .style("fill", "#2563eb")
+        .style("fill", "#000000")
         .style("font-weight", "700")
         .text("");
 
@@ -487,7 +487,7 @@ function generateSbAgeDonut(data) {
 
     const centerTitle = svg.append("text").attr("text-anchor", "middle").attr("dy", "-0.8em").style("font-size", "11px").style("fill", "#64748b").style("font-weight", "600").text(""); 
     const centerValue = svg.append("text").attr("text-anchor", "middle").attr("dy", "0.5em").style("font-size", "22px").style("fill", "#0f172a").style("font-weight", "bold").text(""); 
-    const centerPct = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#2563eb").style("font-weight", "700").text("");
+    const centerPct = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#000000").style("font-weight", "700").text("");
 
     function updateCenterText(label, value) {
         centerTitle.text(`Age: ${label}`);
@@ -649,7 +649,10 @@ function renderUnlicensedCharts(data) {
     generateUnLineChart(isolatedData);
 }
 
-// --- Chart A: Age Donut (Chronological Sort Fix) ---
+// Custom Purple Palette
+// Premium LearnUI-Style Teal/Cyan Palette
+const unColorArray = ["#004c6d", "#006989", "#0087a3", "#00a6bb", "#00c6d0", "#00e7e2", "#00ffff"];
+
 function generateUnAgeDonut(data) {
     const containerId = "#chartUnAge";
     d3.select(containerId).selectAll("*").remove();
@@ -667,7 +670,6 @@ function generateUnAgeDonut(data) {
     let chartData = Object.keys(summary).map(key => ({ label: key, value: summary[key] }));
     if (chartData.length === 0) return;
 
-    // THE FIX: Override default sorting to force chronological age order
     const ageOrder = ["0-16", "17-25", "26-39", "40-64", "65 and over", "All ages", "Not Recorded"];
     chartData.sort((a, b) => {
         let indexA = ageOrder.indexOf(a.label);
@@ -681,14 +683,14 @@ function generateUnAgeDonut(data) {
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`)
         .append("g").attr("transform", `translate(${width / 2 - 70}, ${height / 2})`);
 
-    const color = d3.scaleOrdinal(d3.schemePurples[9].slice(3)); 
-    const pie = d3.pie().value(d => d.value).sort(null); // sort(null) is required to respect our custom order
+    const color = d3.scaleOrdinal().range(unColorArray); 
+    const pie = d3.pie().value(d => d.value).sort(null); 
     const arc = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.9);
     const arcHover = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.95);
 
     const cT = svg.append("text").attr("text-anchor", "middle").attr("dy", "-0.8em").style("font-size", "11px").style("fill", "#64748b").text(""); 
     const cV = svg.append("text").attr("text-anchor", "middle").attr("dy", "0.5em").style("font-size", "22px").style("fill", "#0f172a").style("font-weight", "bold").text(""); 
-    const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#9333ea").style("font-weight", "700").text("");
+    const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#000000").style("font-weight", "700").text("");
 
     function up(l, v) { cT.text(`Age: ${l}`); cV.text(v.toLocaleString()); cP.text(`${((v / totalFines) * 100).toFixed(1)}%`); }
     function cl() { cT.text(""); cV.text(""); cP.text(""); }
@@ -714,7 +716,6 @@ function generateUnAgeDonut(data) {
     lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "10px").style("fill", "#334155").text(d => d.label);
 }
 
-// --- Chart B: Jurisdiction Bar Chart (Tooltip Fix) ---
 function generateUnJurisdictionBar(data) {
     const containerId = "#chartUnJurisdiction";
     d3.select(containerId).selectAll("*").remove();
@@ -728,53 +729,39 @@ function generateUnJurisdictionBar(data) {
     const x = d3.scaleLinear().domain([0, d3.max(cD, d => d.f)]).range([0, w - m.left - m.right]);
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
 
-    // THE FIX: Ensure tooltip element exists!
+    const colorScale = d3.scaleOrdinal().range(unColorArray);
+
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", d => x(d.f)).attr("fill", "#a855f7").attr("rx", 3).style("cursor", "pointer")
+    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", d => x(d.f))
+        .attr("fill", d => colorScale(d.j)) // Fixed dynamic bar color
+        .attr("rx", 3).style("cursor", "pointer")
         .on("mouseover", function(event, d) {
             d3.select(this).attr("opacity", 0.7);
             tooltip.style("visibility", "visible").html(`<strong>${d.j}</strong><br/>Fines: ${d.f.toLocaleString()}`);
         })
-        .on("mousemove", function(event) {
-            tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px");
-        })
-        .on("mouseout", function() {
-            d3.select(this).attr("opacity", 1);
-            tooltip.style("visibility", "hidden");
-        });
+        .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
+        .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
 
     svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "11px").style("fill", "#334155");
     svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "10px").style("fill", "#64748b");
 }
 
-// --- Chart C: Annual Trend Line (Timeline Pre-fill Fix) ---
 function generateUnLineChart(data) {
     const containerId = "#chartUnLine";
     d3.select(containerId).selectAll("*").remove();
 
     const sum = {};
-    
-    // THE FIX: Pre-fill a continuous timeline from 2008 to 2024 with zeros.
-    // This guarantees the X-Axis never breaks, even if a year is entirely missing from the data.
-    for (let year = 2008; year <= 2024; year++) {
-        sum[String(year)] = 0;
-    }
-
-    // Now process the actual data on top of the pre-filled timeline
+    for (let year = 2008; year <= 2024; year++) { sum[String(year)] = 0; }
     data.forEach(d => { 
         const key = String(d.year).trim(); 
-        if(key && key !== 'Unknown' && sum.hasOwnProperty(key)) {
-            sum[key] += d.fines; 
-        } 
+        if(key && key !== 'Unknown' && sum.hasOwnProperty(key)) { sum[key] += d.fines; } 
     });
-
     let cD = Object.keys(sum).map(k => ({ y: k, v: sum[k] })).sort((a,b) => d3.ascending(a.y, b.y));
 
     const w = 850, h = 280, m = { top: 30, right: 40, bottom: 40, left: 75 };
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
-    
     const x = d3.scalePoint().domain(cD.map(d => d.y)).range([0, w - m.left - m.right]).padding(0.15); 
     const y = d3.scaleLinear().domain([0, d3.max(cD, d => d.v) || 100]).range([h - m.top - m.bottom, 0]);
     
@@ -784,47 +771,38 @@ function generateUnLineChart(data) {
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
     svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("r", 4).attr("fill", "#ffffff").attr("stroke", "#9333ea").attr("stroke-width", 2).style("cursor", "pointer")
-        .on("mouseover", function(event, d) {
-            d3.select(this).attr("r", 7).attr("fill", "#9333ea");
-            tooltip.style("visibility", "visible").html(`<strong>Year: ${d.y}</strong><br/>Fines: ${d.v.toLocaleString()}`);
-        })
-        .on("mousemove", function(event) {
-            tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px");
-        })
-        .on("mouseout", function() {
-            d3.select(this).attr("r", 4).attr("fill", "#ffffff");
-            tooltip.style("visibility", "hidden");
-        });
+        .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#9333ea"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.y}</strong><br/>Fines: ${d.v.toLocaleString()}`); })
+        .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px"); })
+        .on("mouseout", function() { d3.select(this).attr("r", 4).attr("fill", "#ffffff"); tooltip.style("visibility", "hidden"); });
 
     const ticks = ['2008', '2012', '2016', '2020', '2024'];
     svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).tickValues(ticks)).style("font-size", "12px").style("fill", "#334155");
     svg.append("g").call(d3.axisLeft(y).ticks(5).tickFormat(d3.format("~s"))).style("font-size", "11px");
 }
 
-
 // ======================================================================
 // MOBILE PHONE USE PAGE ENGINE
 // ======================================================================
 
 function renderMobileCharts(data) {
-    // 1. Isolate the mobile phone data
     const isolatedData = data.filter(item => {
         const name = item.metric ? item.metric.toLowerCase() : "";
         return name.includes('mobile');
     });
 
-    // 2. Update KPIs
     d3.select("#kpi-mp-fines").text(d3.sum(isolatedData, d => d.fines).toLocaleString());
     d3.select("#kpi-mp-arrests").text(d3.sum(isolatedData, d => d.arrests).toLocaleString());
     d3.select("#kpi-mp-charges").text(d3.sum(isolatedData, d => d.charges).toLocaleString());
 
-    // 3. Draw Charts
     generateMpAgeDonut(isolatedData);
     generateMpJurisdictionBar(isolatedData);
     generateMpLineChart(isolatedData);
 }
 
-// --- Chart A: Age Donut (Chronological Sort Fix) ---
+
+// Premium LearnUI-Style Warm Sunset Palette
+const mpColorArray = ["#7a0010", "#9e0018", "#c4001c", "#ea0d1e", "#ff4b38", "#ff7656", "#ffa67c"];
+
 function generateMpAgeDonut(data) {
     const containerId = "#chartMpAge";
     d3.select(containerId).selectAll("*").remove();
@@ -842,7 +820,6 @@ function generateMpAgeDonut(data) {
     let chartData = Object.keys(summary).map(key => ({ label: key, value: summary[key] }));
     if (chartData.length === 0) return;
 
-    // The Chronological Sorting Fix
     const ageOrder = ["0-16", "17-25", "26-39", "40-64", "65 and over", "All ages", "Not Recorded"];
     chartData.sort((a, b) => {
         let indexA = ageOrder.indexOf(a.label);
@@ -856,15 +833,14 @@ function generateMpAgeDonut(data) {
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`)
         .append("g").attr("transform", `translate(${width / 2 - 70}, ${height / 2})`);
 
-    // Using an Orange Theme
-    const color = d3.scaleOrdinal(d3.schemeOranges[9].slice(3)); 
+    const color = d3.scaleOrdinal().range(mpColorArray); 
     const pie = d3.pie().value(d => d.value).sort(null); 
     const arc = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.9);
     const arcHover = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.95);
 
     const cT = svg.append("text").attr("text-anchor", "middle").attr("dy", "-0.8em").style("font-size", "11px").style("fill", "#64748b").text(""); 
     const cV = svg.append("text").attr("text-anchor", "middle").attr("dy", "0.5em").style("font-size", "22px").style("fill", "#0f172a").style("font-weight", "bold").text(""); 
-    const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#f97316").style("font-weight", "700").text("");
+    const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#000000").style("font-weight", "700").text("");
 
     function up(l, v) { cT.text(`Age: ${l}`); cV.text(v.toLocaleString()); cP.text(`${((v / totalFines) * 100).toFixed(1)}%`); }
     function cl() { cT.text(""); cV.text(""); cP.text(""); }
@@ -890,7 +866,6 @@ function generateMpAgeDonut(data) {
     lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "10px").style("fill", "#334155").text(d => d.label);
 }
 
-// --- Chart B: Jurisdiction Bar Chart (Tooltip Fix included) ---
 function generateMpJurisdictionBar(data) {
     const containerId = "#chartMpJurisdiction";
     d3.select(containerId).selectAll("*").remove();
@@ -904,102 +879,79 @@ function generateMpJurisdictionBar(data) {
     const x = d3.scaleLinear().domain([0, d3.max(cD, d => d.f)]).range([0, w - m.left - m.right]);
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
 
+    const colorScale = d3.scaleOrdinal().range(mpColorArray);
+
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
     svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", d => x(d.f))
-        .attr("fill", "#f97316") // Orange
+        .attr("fill", d => colorScale(d.j)) // Fixed dynamic bar color
         .attr("rx", 3).style("cursor", "pointer")
         .on("mouseover", function(event, d) {
             d3.select(this).attr("opacity", 0.7);
             tooltip.style("visibility", "visible").html(`<strong>${d.j}</strong><br/>Fines: ${d.f.toLocaleString()}`);
         })
-        .on("mousemove", function(event) {
-            tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px");
-        })
-        .on("mouseout", function() {
-            d3.select(this).attr("opacity", 1);
-            tooltip.style("visibility", "hidden");
-        });
+        .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
+        .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
 
     svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "11px").style("fill", "#334155");
     svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "10px").style("fill", "#64748b");
 }
 
-// --- Chart C: Annual Trend Line (X-Axis Pre-fill Fix included) ---
 function generateMpLineChart(data) {
     const containerId = "#chartMpLine";
     d3.select(containerId).selectAll("*").remove();
 
     const sum = {};
-    
-    // The Pre-fill Timeline Fix
-    for (let year = 2008; year <= 2024; year++) {
-        sum[String(year)] = 0;
-    }
-
+    for (let year = 2008; year <= 2024; year++) { sum[String(year)] = 0; }
     data.forEach(d => { 
         const key = String(d.year).trim(); 
-        if(key && key !== 'Unknown' && sum.hasOwnProperty(key)) {
-            sum[key] += d.fines; 
-        } 
+        if(key && key !== 'Unknown' && sum.hasOwnProperty(key)) { sum[key] += d.fines; } 
     });
     let cD = Object.keys(sum).map(k => ({ y: k, v: sum[k] })).sort((a,b) => d3.ascending(a.y, b.y));
 
     const w = 850, h = 280, m = { top: 30, right: 40, bottom: 40, left: 75 };
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
-    
     const x = d3.scalePoint().domain(cD.map(d => d.y)).range([0, w - m.left - m.right]).padding(0.15); 
     const y = d3.scaleLinear().domain([0, d3.max(cD, d => d.v) || 100]).range([h - m.top - m.bottom, 0]);
     
-    // Orange Trend Line
-    svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#f97316").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
+    svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#e11d48").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
 
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("r", 4).attr("fill", "#ffffff").attr("stroke", "#f97316").attr("stroke-width", 2).style("cursor", "pointer")
-        .on("mouseover", function(event, d) {
-            d3.select(this).attr("r", 7).attr("fill", "#f97316");
-            tooltip.style("visibility", "visible").html(`<strong>Year: ${d.y}</strong><br/>Fines: ${d.v.toLocaleString()}`);
-        })
-        .on("mousemove", function(event) {
-            tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px");
-        })
-        .on("mouseout", function() {
-            d3.select(this).attr("r", 4).attr("fill", "#ffffff");
-            tooltip.style("visibility", "hidden");
-        });
+    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("r", 4).attr("fill", "#ffffff").attr("stroke", "#e11d48").attr("stroke-width", 2).style("cursor", "pointer")
+        .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#e11d48"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.y}</strong><br/>Fines: ${d.v.toLocaleString()}`); })
+        .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px"); })
+        .on("mouseout", function() { d3.select(this).attr("r", 4).attr("fill", "#ffffff"); tooltip.style("visibility", "hidden"); });
 
     const ticks = ['2008', '2012', '2016', '2020', '2024'];
     svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).tickValues(ticks)).style("font-size", "12px").style("fill", "#334155");
     svg.append("g").call(d3.axisLeft(y).ticks(5).tickFormat(d3.format("~s"))).style("font-size", "11px");
 }
 
-
 // ======================================================================
 // SPEEDING FINES PAGE ENGINE
 // ======================================================================
 
 function renderSpeedCharts(data) {
-    // 1. Isolate the speeding data
     const isolatedData = data.filter(item => {
         const name = item.metric ? item.metric.toLowerCase() : "";
-        return name.includes('speed'); // Matches "speed fines", "speeding", etc.
+        return name.includes('speed'); 
     });
 
-    // 2. Update KPIs
     d3.select("#kpi-sp-fines").text(d3.sum(isolatedData, d => d.fines).toLocaleString());
     d3.select("#kpi-sp-arrests").text(d3.sum(isolatedData, d => d.arrests).toLocaleString());
     d3.select("#kpi-sp-charges").text(d3.sum(isolatedData, d => d.charges).toLocaleString());
 
-    // 3. Draw Charts
     generateSpAgeDonut(isolatedData);
     generateSpJurisdictionBar(isolatedData);
     generateSpLineChart(isolatedData);
 }
 
-// --- Chart A: Age Donut (Chronological Sort Included) ---
+// Premium LearnUI-Style Deep Blue Palette
+const spColorArray = ["#002051", "#00357a", "#004ca5", "#0065d2", "#2b7fff", "#6b9bff", "#a1b8ff"];
+
 function generateSpAgeDonut(data) {
     const containerId = "#chartSpAge";
     d3.select(containerId).selectAll("*").remove();
@@ -1017,7 +969,6 @@ function generateSpAgeDonut(data) {
     let chartData = Object.keys(summary).map(key => ({ label: key, value: summary[key] }));
     if (chartData.length === 0) return;
 
-    // Chronological Sort
     const ageOrder = ["0-16", "17-25", "26-39", "40-64", "65 and over", "All ages", "Not Recorded"];
     chartData.sort((a, b) => {
         let indexA = ageOrder.indexOf(a.label);
@@ -1031,15 +982,14 @@ function generateSpAgeDonut(data) {
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`)
         .append("g").attr("transform", `translate(${width / 2 - 70}, ${height / 2})`);
 
-    // Green Theme
-    const color = d3.scaleOrdinal(d3.schemeGreens[9].slice(3)); 
+    const color = d3.scaleOrdinal().range(spColorArray); 
     const pie = d3.pie().value(d => d.value).sort(null); 
     const arc = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.9);
     const arcHover = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.95);
 
     const cT = svg.append("text").attr("text-anchor", "middle").attr("dy", "-0.8em").style("font-size", "11px").style("fill", "#64748b").text(""); 
     const cV = svg.append("text").attr("text-anchor", "middle").attr("dy", "0.5em").style("font-size", "22px").style("fill", "#0f172a").style("font-weight", "bold").text(""); 
-    const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#16a34a").style("font-weight", "700").text("");
+    const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#000000").style("font-weight", "700").text("");
 
     function up(l, v) { cT.text(`Age: ${l}`); cV.text(v.toLocaleString()); cP.text(`${((v / totalFines) * 100).toFixed(1)}%`); }
     function cl() { cT.text(""); cV.text(""); cP.text(""); }
@@ -1065,7 +1015,6 @@ function generateSpAgeDonut(data) {
     lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "10px").style("fill", "#334155").text(d => d.label);
 }
 
-// --- Chart B: Jurisdiction Bar Chart (Tooltip Included) ---
 function generateSpJurisdictionBar(data) {
     const containerId = "#chartSpJurisdiction";
     d3.select(containerId).selectAll("*").remove();
@@ -1079,75 +1028,53 @@ function generateSpJurisdictionBar(data) {
     const x = d3.scaleLinear().domain([0, d3.max(cD, d => d.f)]).range([0, w - m.left - m.right]);
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
 
+    const colorScale = d3.scaleOrdinal().range(spColorArray);
+
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
     svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", d => x(d.f))
-        .attr("fill", "#22c55e") // Green
+        .attr("fill", d => colorScale(d.j)) // Fixed dynamic bar color
         .attr("rx", 3).style("cursor", "pointer")
         .on("mouseover", function(event, d) {
             d3.select(this).attr("opacity", 0.7);
             tooltip.style("visibility", "visible").html(`<strong>${d.j}</strong><br/>Fines: ${d.f.toLocaleString()}`);
         })
-        .on("mousemove", function(event) {
-            tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px");
-        })
-        .on("mouseout", function() {
-            d3.select(this).attr("opacity", 1);
-            tooltip.style("visibility", "hidden");
-        });
+        .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
+        .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
 
     svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "11px").style("fill", "#334155");
     svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "10px").style("fill", "#64748b");
 }
 
-// --- Chart C: Annual Trend Line (X-Axis Pre-fill Included) ---
 function generateSpLineChart(data) {
     const containerId = "#chartSpLine";
     d3.select(containerId).selectAll("*").remove();
 
     const sum = {};
-    
-    // Timeline Pre-fill
-    for (let year = 2008; year <= 2024; year++) {
-        sum[String(year)] = 0;
-    }
-
+    for (let year = 2008; year <= 2024; year++) { sum[String(year)] = 0; }
     data.forEach(d => { 
         const key = String(d.year).trim(); 
-        if(key && key !== 'Unknown' && sum.hasOwnProperty(key)) {
-            sum[key] += d.fines; 
-        } 
+        if(key && key !== 'Unknown' && sum.hasOwnProperty(key)) { sum[key] += d.fines; } 
     });
     let cD = Object.keys(sum).map(k => ({ y: k, v: sum[k] })).sort((a,b) => d3.ascending(a.y, b.y));
 
     const w = 850, h = 280, m = { top: 30, right: 40, bottom: 40, left: 75 };
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
-    
     const x = d3.scalePoint().domain(cD.map(d => d.y)).range([0, w - m.left - m.right]).padding(0.15); 
     const y = d3.scaleLinear().domain([0, d3.max(cD, d => d.v) || 100]).range([h - m.top - m.bottom, 0]);
     
-    // Green Trend Line
-    svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#16a34a").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
+    svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#4338ca").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
 
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("r", 4).attr("fill", "#ffffff").attr("stroke", "#16a34a").attr("stroke-width", 2).style("cursor", "pointer")
-        .on("mouseover", function(event, d) {
-            d3.select(this).attr("r", 7).attr("fill", "#16a34a");
-            tooltip.style("visibility", "visible").html(`<strong>Year: ${d.y}</strong><br/>Fines: ${d.v.toLocaleString()}`);
-        })
-        .on("mousemove", function(event) {
-            tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px");
-        })
-        .on("mouseout", function() {
-            d3.select(this).attr("r", 4).attr("fill", "#ffffff");
-            tooltip.style("visibility", "hidden");
-        });
+    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("r", 4).attr("fill", "#ffffff").attr("stroke", "#4338ca").attr("stroke-width", 2).style("cursor", "pointer")
+        .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#4338ca"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.y}</strong><br/>Fines: ${d.v.toLocaleString()}`); })
+        .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px"); })
+        .on("mouseout", function() { d3.select(this).attr("r", 4).attr("fill", "#ffffff"); tooltip.style("visibility", "hidden"); });
 
     const ticks = ['2008', '2012', '2016', '2020', '2024'];
     svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).tickValues(ticks)).style("font-size", "12px").style("fill", "#334155");
     svg.append("g").call(d3.axisLeft(y).ticks(5).tickFormat(d3.format("~s"))).style("font-size", "11px");
 }
-
