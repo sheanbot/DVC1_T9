@@ -13,7 +13,11 @@
         <div class="logo">Traffic Analytics</div>
         <nav class="nav-links">
             <button class="nav-btn active" id="btn-home" onclick="switchView('home')">Home</button>
-            <button class="nav-btn" id="btn-dashboard" onclick="switchView('dashboard')">Fines</button>
+            <button class="nav-btn" id="btn-dashboard" onclick="switchView('dashboard')">Fines Overview</button>
+            <button class="nav-btn" id="btn-seatbelts" onclick="switchView('seatbelts')">Seatbelt Analysis</button>
+            <button class="nav-btn" id="btn-unlicensed" onclick="switchView('unlicensed')">Unlicensed Driving</button>
+            <button class="nav-btn" id="btn-mobile" onclick="switchView('mobile')">Mobile Phone Use</button>
+            <button class="nav-btn" id="btn-speed" onclick="switchView('speed')">Speeding Fines</button>
             <button class="nav-btn" id="btn-details" onclick="switchView('details')">Data Records</button>
         </nav>
     </header>
@@ -21,9 +25,27 @@
     <main class="app-container">
 
         <section id="home-view" class="view-section active">
-            <div class="hero-card">
-                <h1>Australian Traffic Enforcement Intelligence</h1>
-                <p>Welcome to the central intelligence hub. Use the top navigation to explore interactive traffic violation data, monitor enforcement outcomes, and view detailed records.</p>
+            <div class="hero-card" style="max-width: 900px; background: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                <h1 style="color: #0f172a; margin-bottom: 15px; font-size: 2.2rem;">Australian Traffic Enforcement Intelligence</h1>
+                
+                <p style="font-size: 1.05rem; color: #475569; margin-bottom: 25px; line-height: 1.6;">
+                    Welcome to the central intelligence hub. This dashboard presents the official <strong>Annual Enforcement series</strong>, allowing you to explore interactive traffic violation data and monitor enforcement outcomes. The current dataset tracks:
+                </p>
+
+                <ul style="margin-bottom: 30px; padding-left: 20px; font-size: 1rem; color: #334155; line-height: 1.8;">
+                    <li><strong>Mobile phone fines</strong> issued, including camera detection.</li>
+                    <li><strong>Speeding fines</strong> issued, including camera detection.</li>
+                    <li><strong>Seatbelt fines</strong> issued by police and camera detection.</li>
+                    <li><strong>Unlicensed driving</strong> issued by police (introduced from 2023).</li>
+                </ul>
+
+                <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 0 4px 4px 0;">
+                    <span style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Methodology Note</span>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #475569; line-height: 1.6;">
+                        <li>Arrests and charges have been collected from data reported since 2023, but may not be applicable for all states and territories.</li>
+                        <li>Data is subject to revision.</li>
+                    </ul>
+                </div>
             </div>
         </section>
 
@@ -62,7 +84,7 @@
                 </div>
 
                 <div class="chart-wrapper grid-chart-1">
-                    <h3>Offence Violation Breakdown</h3>
+                    <h3>Offence Violation Breakdown by Fines</h3>
                     <div id="chartViolations" class="chart-container"></div>
                 </div>
                 
@@ -74,6 +96,210 @@
                 <div class="chart-wrapper grid-chart-line">
                     <h3>Annual Fines Trend Analysis</h3>
                     <div id="chartLine" class="chart-container"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="seatbelts-view" class="view-section">
+            <div class="dashboard-grid">
+                
+                <div class="filter-panel grid-filters">
+                    <h3>Seatbelt Controls</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+                        This view is pre-filtered to strictly show data for "Non-wearing seatbelt" offences.
+                    </p>
+                    <div class="control-group" style="margin-top: 15px;">
+                        <label>State / Jurisdiction</label>
+                        <select id="filter-sb-jurisdiction"><option value="all">All States</option></select>
+                    </div>
+                    <div class="control-group">
+                        <label>Geographic Location</label>
+                        <select id="filter-sb-location"><option value="all">All Regions</option></select>
+                    </div>
+                </div>
+
+                <div class="kpi-panel grid-kpis">
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Seatbelt Fines</span>
+                        <span class="kpi-value" id="kpi-sb-fines">0</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Seatbelt Arrests</span>
+                        <span class="kpi-value" id="kpi-sb-arrests">0</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Seatbelt Charges</span>
+                        <span class="kpi-value" id="kpi-sb-charges">0</span>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper grid-chart-1">
+                    <h3>Seatbelt Violations by Age Group</h3>
+                    <div id="chartSbAge" class="chart-container"></div>
+                </div>
+                
+                <div class="chart-wrapper grid-chart-2">
+                    <h3>Seatbelt Violations by Jurisdiction</h3>
+                    <div id="chartSbJurisdiction" class="chart-container"></div>
+                </div>
+
+                <div class="chart-wrapper grid-chart-line">
+                    <h3>Annual Seatbelt Fines Trend</h3>
+                    <div id="chartSbLine" class="chart-container"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="unlicensed-view" class="view-section">
+            <div class="dashboard-grid">
+                
+                <div class="filter-panel grid-filters">
+                    <h3>License Controls</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+                        Pre-filtered data for drivers operating vehicles without a valid or authorized license.
+                    </p>
+                    <div class="control-group" style="margin-top: 15px;">
+                        <label>State / Jurisdiction</label>
+                        <select id="filter-un-jurisdiction"><option value="all">All States</option></select>
+                    </div>
+                    <div class="control-group">
+                        <label>Geographic Location</label>
+                        <select id="filter-un-location"><option value="all">All Regions</option></select>
+                    </div>
+                </div>
+
+                <div class="kpi-panel grid-kpis">
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Unlicensed Fines</span>
+                        <span class="kpi-value" id="kpi-un-fines">0</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Unlicensed Arrests</span>
+                        <span class="kpi-value" id="kpi-un-arrests">0</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Unlicensed Charges</span>
+                        <span class="kpi-value" id="kpi-un-charges">0</span>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper grid-chart-1">
+                    <h3>Unlicensed Violations by Age Group</h3>
+                    <div id="chartUnAge" class="chart-container"></div>
+                </div>
+                
+                <div class="chart-wrapper grid-chart-2">
+                    <h3>Unlicensed Violations by Jurisdiction</h3>
+                    <div id="chartUnJurisdiction" class="chart-container"></div>
+                </div>
+
+                <div class="chart-wrapper grid-chart-line">
+                    <h3>Annual Unlicensed Trend Analysis</h3>
+                    <div id="chartUnLine" class="chart-container"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="mobile-view" class="view-section">
+            <div class="dashboard-grid">
+                
+                <div class="filter-panel grid-filters">
+                    <h3>Mobile Controls</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+                        Pre-filtered data for drivers operating a vehicle while illegally using a mobile phone.
+                    </p>
+                    <div class="control-group" style="margin-top: 15px;">
+                        <label>State / Jurisdiction</label>
+                        <select id="filter-mp-jurisdiction"><option value="all">All States</option></select>
+                    </div>
+                    <div class="control-group">
+                        <label>Geographic Location</label>
+                        <select id="filter-mp-location"><option value="all">All Regions</option></select>
+                    </div>
+                </div>
+
+                <div class="kpi-panel grid-kpis">
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Mobile Fines</span>
+                        <span class="kpi-value" id="kpi-mp-fines">0</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Mobile Arrests</span>
+                        <span class="kpi-value" id="kpi-mp-arrests">0</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Mobile Charges</span>
+                        <span class="kpi-value" id="kpi-mp-charges">0</span>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper grid-chart-1">
+                    <h3>Mobile Violations by Age Group</h3>
+                    <div id="chartMpAge" class="chart-container"></div>
+                </div>
+                
+                <div class="chart-wrapper grid-chart-2">
+                    <h3>Mobile Violations by Jurisdiction</h3>
+                    <div id="chartMpJurisdiction" class="chart-container"></div>
+                </div>
+
+                <div class="chart-wrapper grid-chart-line">
+                    <h3>Annual Mobile Use Trend Analysis</h3>
+                    <div id="chartMpLine" class="chart-container"></div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="speed-view" class="view-section">
+            <div class="dashboard-grid">
+                
+                <div class="filter-panel grid-filters">
+                    <h3>Speeding Controls</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+                        Pre-filtered data for drivers exceeding the posted speed limit.
+                    </p>
+                    <div class="control-group" style="margin-top: 15px;">
+                        <label>State / Jurisdiction</label>
+                        <select id="filter-sp-jurisdiction"><option value="all">All States</option></select>
+                    </div>
+                    <div class="control-group">
+                        <label>Geographic Location</label>
+                        <select id="filter-sp-location"><option value="all">All Regions</option></select>
+                    </div>
+                </div>
+
+                <div class="kpi-panel grid-kpis">
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Speeding Fines</span>
+                        <span class="kpi-value" id="kpi-sp-fines">0</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Speeding Arrests</span>
+                        <span class="kpi-value" id="kpi-sp-arrests">0</span>
+                    </div>
+                    <div class="kpi-card">
+                        <span class="kpi-title">Total Speeding Charges</span>
+                        <span class="kpi-value" id="kpi-sp-charges">0</span>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper grid-chart-1">
+                    <h3>Speeding Violations by Age Group</h3>
+                    <div id="chartSpAge" class="chart-container"></div>
+                </div>
+                
+                <div class="chart-wrapper grid-chart-2">
+                    <h3>Speeding Violations by Jurisdiction</h3>
+                    <div id="chartSpJurisdiction" class="chart-container"></div>
+                </div>
+
+                <div class="chart-wrapper grid-chart-line">
+                    <h3>Annual Speeding Trend Analysis</h3>
+                    <div id="chartSpLine" class="chart-container"></div>
                 </div>
 
             </div>
