@@ -405,3 +405,79 @@ tr:hover td {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* ==========================================================================
+   NAVIGATION DROPDOWN MENU
+   ========================================================================== */
+
+/* The wrapper that holds both the button and the hidden menu */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* The actual hidden menu box */
+.dropdown-content {
+    display: none; /* Hidden by default */
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 220px; /* Width of the dropdown */
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1000; /* Ensures it stays on top of your charts */
+    border-radius: 8px;
+    top: 100%; /* Pushes it exactly below the button */
+    left: 0;
+    margin-top: 5px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+/* Restyling the buttons so they look like list items inside the dropdown */
+.dropdown-content .nav-btn {
+    width: 100%;
+    text-align: left;
+    border-radius: 0;
+    margin: 0;
+    padding: 12px 20px;
+    background: transparent;
+    border-bottom: 1px solid #f1f5f9; /* Subtle divider between items */
+}
+
+/* Remove the border from the last item so it looks clean */
+.dropdown-content .nav-btn:last-child {
+    border-bottom: none;
+}
+
+/* Hover effect for the items inside the dropdown */
+.dropdown-content {
+    display: none; 
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 220px; 
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1000; 
+    border-radius: 8px;
+    top: 100%; 
+    
+    /* THE FIX: Removed margin-top so there is no "dead zone" gap! */
+    margin-top: 0; 
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
+/* THE TRIGGER: Show the dropdown menu when hovering over the wrapper */
+.nav-dropdown:hover .dropdown-content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* THE FIX: Force the active dropdown button to be blue with white text */
+.dropdown-content .nav-btn.active {
+    background-color: #2563eb !important; /* Force the blue background */
+    color: #ffffff !important;           /* Force the white text */
+}
+
+/* Keep the text white even if they hover over the active button again */
+.dropdown-content .nav-btn.active:hover {
+    background-color: #1d4ed8 !important; /* Slightly darker blue on hover */
+    color: #ffffff !important;
+}
