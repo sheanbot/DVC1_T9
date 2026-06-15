@@ -1,3 +1,15 @@
+// Map short form jurisdiction abbreviations to their full names
+const jurisdictionMap = {
+    'NSW': 'New South Wales (NSW)',
+    'QLD': 'Queensland (QLD)',
+    'VIC': 'Victoria (VIC)',
+    'WA':  'Western Australia (WA)',
+    'SA':  'South Australia (SA)',
+    'NT':  'Northern Territory (NT)',
+    'TAS': 'Tasmania (TAS)',
+    'ACT': 'Australian Capital Territory (ACT)'
+};
+
 let rawDataset = [];
 
 // Handle Page Navigation
@@ -23,7 +35,7 @@ function switchView(viewId) {
             }
         }, 50);
     } 
-    // --- NEW: Trigger redraw for Seatbelts page ---
+    // Trigger redraw for Seatbelts page
     else if (viewId === 'seatbelts') {
         setTimeout(() => {
             if (typeof runSeatbeltFilterCycle === "function") {
@@ -31,7 +43,7 @@ function switchView(viewId) {
             }
         }, 50);
     }   
-    // Add to switchView(viewId) function
+    // Trigger redraw for Unlicensed page
     else if (viewId === 'unlicensed') {
         setTimeout(() => {
             if (typeof runUnlicensedFilterCycle === "function") {
@@ -39,15 +51,15 @@ function switchView(viewId) {
             }
         }, 50);
     }
-
+    // Trigger redraw for Mobile Phone page
     else if (viewId === 'mobile') {
-            setTimeout(() => {
-                if (typeof runMobileFilterCycle === "function") {
-                    runMobileFilterCycle();
-                }
-            }, 50);
-        }
-
+        setTimeout(() => {
+            if (typeof runMobileFilterCycle === "function") {
+                runMobileFilterCycle();
+            }
+        }, 50);
+    }
+    // Trigger redraw for Speeding page
     else if (viewId === 'speed') {
         setTimeout(() => {
             if (typeof runSpeedFilterCycle === "function") {
@@ -65,9 +77,15 @@ function parseCSVMatrix(text) {
         let loc = cols[2] ? cols[2].trim().replace(/^"|"$/g, '') : 'Unknown';
         if (loc.toLowerCase() === 'all regions') loc = 'All Regions';
 
+        // Extract and clean the raw short-form abbreviation
+        const rawJurisdiction = cols[1] ? cols[1].trim().replace(/^"|"$/g, '') : 'Unknown';
+        
+        // Convert to full form if it exists in our dictionary; otherwise keep the raw value
+        const fullJurisdiction = jurisdictionMap[rawJurisdiction] || rawJurisdiction;
+
         return {
             year: cols[0] ? cols[0].trim().replace(/^"|"$/g, '') : 'Unknown',
-            jurisdiction: cols[1] ? cols[1].trim().replace(/^"|"$/g, '') : 'Unknown',
+            jurisdiction: fullJurisdiction, // Standardized full name output
             location: loc,
             ageGroup: cols[3] ? cols[3].trim().replace(/^"|"$/g, '') : 'Unknown',
             metric: cols[4] ? cols[4].trim().replace(/^"|"$/g, '') : 'Unknown',
@@ -113,11 +131,21 @@ function populateUISelect(elementId, items) {
         if (item && item !== 'Unknown' && item.toLowerCase() !== 'all regions') {
             const el = document.createElement('option');
             el.value = item;
-            el.textContent = item.replace(/_/g, ' ');
+            
+            // 1. Clean the string by replacing underscores with spaces
+            let cleanText = item.replace(/_/g, ' ');
+            
+            // 2. Transform the text to Title Case (Capitalize each word)
+            let formattedText = cleanText.split(' ')
+                                         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                                         .join(' ');
+            
+            el.textContent = formattedText;
             select.appendChild(el);
         }
     });
 }
+
 // ==========================================
 // MAIN DASHBOARD PIPELINE
 // ==========================================
@@ -151,7 +179,6 @@ function runSeatbeltFilterCycle() {
     const selectedState = document.getElementById('filter-sb-jurisdiction').value;
     const selectedLoc = document.getElementById('filter-sb-location').value;
 
-    // Filter by the dropdown selections first
     const filtered = rawDataset.filter(item => {
         const matchState = (selectedState === 'all' || item.jurisdiction === selectedState);
         const matchLoc = (selectedLoc === 'all' || item.location === selectedLoc);
@@ -200,13 +227,6 @@ function runMobileFilterCycle() {
     }
 }
 
-// Add New Event Listeners to loadPortalData()
-const unTriggers = ['filter-un-jurisdiction', 'filter-un-location'];
-unTriggers.forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.addEventListener('change', runUnlicensedFilterCycle);
-});
-
 // ==========================================
 // NEW: SPEEDING PAGE PIPELINE
 // ==========================================
@@ -224,13 +244,6 @@ function runSpeedFilterCycle() {
         renderSpeedCharts(filtered);
     }
 }
-// 4. Speeding Dropdown Listeners
-        const spTriggers = ['filter-sp-jurisdiction', 'filter-sp-location'];
-        spTriggers.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.addEventListener('change', runSpeedFilterCycle);
-        });
-
 
 // ==========================================
 // UTILITY UPDATES
@@ -283,7 +296,7 @@ function populateSummaryTable(data) {
 }
 
 // ==========================================
-// APP INITIALIZATION
+// APP INITIALIZATION & PORTAL LOAD
 // ==========================================
 async function loadPortalData() {
     try {
@@ -305,11 +318,32 @@ async function loadPortalData() {
             if(el) el.addEventListener('change', runDataFilterCycle);
         });
 
-        // 2. NEW: Seatbelt Dropdown Listeners
+        // 2. Seatbelt Dropdown Listeners
         const sbTriggers = ['filter-sb-jurisdiction', 'filter-sb-location'];
         sbTriggers.forEach(id => {
             const el = document.getElementById(id);
             if(el) el.addEventListener('change', runSeatbeltFilterCycle);
+        });
+
+        // 3. Unlicensed Dropdown Listeners
+        const unTriggers = ['filter-un-jurisdiction', 'filter-un-location'];
+        unTriggers.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('change', runUnlicensedFilterCycle);
+        });
+
+        // 4. Mobile Dropdown Listeners
+        const mpTriggers = ['filter-mp-jurisdiction', 'filter-mp-location'];
+        mpTriggers.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('change', runMobileFilterCycle);
+        });
+
+        // 5. Speeding Dropdown Listeners
+        const spTriggers = ['filter-sp-jurisdiction', 'filter-sp-location'];
+        spTriggers.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.addEventListener('change', runSpeedFilterCycle);
         });
 
     } catch (err) {
@@ -319,10 +353,21 @@ async function loadPortalData() {
 
 window.addEventListener('DOMContentLoaded', loadPortalData);
 
-
-// 3. Mobile Dropdown Listeners
-        const mpTriggers = ['filter-mp-jurisdiction', 'filter-mp-location'];
-        mpTriggers.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.addEventListener('change', runMobileFilterCycle);
-        });
+// ==========================================
+// DYNAMIC VIEWPORT RESIZE ENGINE
+// ==========================================
+let resizeDebounceTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeDebounceTimer);
+    resizeDebounceTimer = setTimeout(() => {
+        const activeSection = document.querySelector('.view-section.active');
+        if (!activeSection) return;
+        
+        const viewId = activeSection.id.replace('-view', '');
+        if (viewId === 'dashboard') runDataFilterCycle();
+        else if (viewId === 'seatbelts') runSeatbeltFilterCycle();
+        else if (viewId === 'unlicensed') runUnlicensedFilterCycle();
+        else if (viewId === 'mobile') runMobileFilterCycle();
+        else if (viewId === 'speed') runSpeedFilterCycle();
+    }, 250); 
+});

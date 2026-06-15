@@ -33,27 +33,37 @@
     <main class="app-container">
 
         <section id="home-view" class="view-section active">
-            <div class="hero-card" style="max-width: 900px; background: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-                <h1 style="color: #0f172a; margin-bottom: 15px; font-size: 2.2rem;">Australian Traffic Enforcement Intelligence</h1>
+            <div class="dashboard-grid">
                 
-                <p style="font-size: 1.05rem; color: #475569; margin-bottom: 25px; line-height: 1.6;">
-                    Welcome to the central intelligence hub. This dashboard presents the official <strong>Annual Enforcement series</strong>, allowing you to explore interactive traffic violation data and monitor enforcement outcomes. The current dataset tracks:
-                </p>
-
-                <ul style="margin-bottom: 30px; padding-left: 20px; font-size: 1rem; color: #334155; line-height: 1.8;">
-                    <li><strong>Mobile phone fines</strong> issued, including camera detection.</li>
-                    <li><strong>Speeding fines</strong> issued, including camera detection.</li>
-                    <li><strong>Seatbelt fines</strong> issued by police and camera detection.</li>
-                    <li><strong>Unlicensed driving</strong> issued by police (introduced from 2023).</li>
-                </ul>
-
-                <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 0 4px 4px 0;">
-                    <span style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 8px;">Methodology Note</span>
-                    <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #475569; line-height: 1.6;">
-                        <li>Arrests and charges have been collected from data reported since 2023, but may not be applicable for all states and territories.</li>
-                        <li>Data is subject to revision.</li>
-                    </ul>
+                <div class="filter-panel grid-filters" style="justify-content: center; align-items: center; overflow: hidden;">
+                    <img src="./images/homepage_traffic.png" alt="Traffic Enforcement Representation" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
                 </div>
+
+                <div class="chart-wrapper grid-chart-line" style="height: 100%; justify-content: center; padding: 32px 40px;">
+                    <h1 style="color: #0f172a; margin-bottom: 16px; font-size: 2.2rem; font-weight: 700; letter-spacing: -0.5px;">
+                        Australian Traffic Enforcement Intelligence
+                    </h1>
+                    
+                    <p style="font-size: 1.1rem; color: #475569; margin-bottom: 20px; line-height: 1.6;">
+                        Welcome to the central intelligence hub. This dashboard presents the official <strong>Annual Enforcement series</strong>, allowing you to explore interactive traffic violation data and monitor enforcement outcomes. The current dataset tracks:
+                    </p>
+
+                    <ul style="margin-bottom: 24px; padding-left: 20px; font-size: 1.05rem; color: #334155; line-height: 1.8;">
+                        <li><strong>Mobile phone fines</strong> issued, including camera detection.</li>
+                        <li><strong>Speeding fines</strong> issued, including camera detection.</li>
+                        <li><strong>Seatbelt fines</strong> issued by police and camera detection.</li>
+                        <li><strong>Unlicensed driving</strong> issued by police (introduced from 2023).</li>
+                    </ul>
+
+                    <div style="background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 0 8px 8px 0; min-height: 0;">
+                        <span style="display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px;">Methodology Note</span>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: #475569; line-height: 1.6;">
+                            <li>Arrests and charges have been collected from data reported since 2023, but may not be applicable for all states and territories.</li>
+                            <li>Data is subject to revision.</li>
+                        </ul>
+                    </div>
+                </div>
+
             </div>
         </section>
 

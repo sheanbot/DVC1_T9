@@ -135,7 +135,7 @@ function generateViolationsChart(data) {
     // 4. Build the Interactive Legend
     const legend = d3.select(containerId).select("svg")
         .append("g")
-        .attr("transform", `translate(${width - 150}, 30)`);
+        .attr("transform", `translate(${width - 150}, 100)`);
 
     const legendRows = legend.selectAll(".legend-row")
         .data(chartData)
@@ -182,10 +182,18 @@ function generateViolationsChart(data) {
     legendRows.append("text")
         .attr("x", 20)
         .attr("y", 10)
-        .style("font-size", "10px")
+        .style("font-size", "13px")
         .style("fill", "#334155")
         .style("font-weight", "500")
-        .text(d => d.label.length > 18 ? d.label.substring(0, 16) + "..." : d.label);
+        .text(d => {
+        // 1. Capitalize the first letter of each word
+        let capitalized = d.label.split(' ')
+                                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(' ');
+        
+        // 2. Trim with trailing dots if it exceeds container limits
+        return capitalized.length > 22 ? capitalized.substring(0, 20) + "..." : capitalized;
+    });
 }
 
 
@@ -285,7 +293,7 @@ function generateOutcomesChart(data) {
     svg.append("g")
         .call(d3.axisLeft(y))
         .selectAll("text")
-        .style("font-size", "11px")
+        .style("font-size", "12px")
         .style("font-weight", "500")
         .style("fill", "#334155");
 
@@ -293,7 +301,7 @@ function generateOutcomesChart(data) {
     svg.append("g")
         .attr("transform", `translate(0, ${innerHeight})`)
         .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("~s")))
-        .style("font-size", "10px")
+        .style("font-size", "12px")
         .style("fill", "#64748b");
 }
 
@@ -500,7 +508,7 @@ function generateSbAgeDonut(data) {
         .attr("fill", d => color(d.data.label)).attr("stroke", "#ffffff").style("stroke-width", "1px").style("transition", "opacity 0.2s");
 
     let pinnedLabel = null; 
-    const legend = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 30)`);
+    const legend = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 90)`);
     const legendRows = legend.selectAll(".legend-row").data(chartData).enter().append("g")
         .attr("class", "legend-row").attr("transform", (d, i) => `translate(0, ${i * 24})`).style("cursor", "pointer")
         .on("mouseover", function(event, d) {
@@ -524,7 +532,7 @@ function generateSbAgeDonut(data) {
         });
 
     legendRows.append("rect").attr("width", 12).attr("height", 12).attr("rx", 3).attr("fill", d => color(d.label));
-    legendRows.append("text").attr("x", 20).attr("y", 10).style("font-size", "10px").style("fill", "#334155").text(d => d.label);
+    legendRows.append("text").attr("x", 20).attr("y", 10).style("font-size", "14px").style("fill", "#334155").text(d => d.label);
 }
 
 // --- Chart B: Jurisdiction Bar Chart ---
@@ -565,8 +573,8 @@ function generateSbJurisdictionBar(data) {
         .on("mousemove", event => tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"))
         .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
 
-    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "11px").style("fill", "#334155");
-    svg.append("g").attr("transform", `translate(0, ${innerHeight})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "10px").style("fill", "#64748b");
+    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
+    svg.append("g").attr("transform", `translate(0, ${innerHeight})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "12px").style("fill", "#64748b");
 }
 
 // --- Chart C: Annual Line Chart (Timeline Pre-fill & Trim Fix) ---
@@ -699,7 +707,7 @@ function generateUnAgeDonut(data) {
         .attr("fill", d => color(d.data.label)).attr("stroke", "#ffffff").style("stroke-width", "1px");
 
     let pinned = null;
-    const leg = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 30)`);
+    const leg = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 90)`);
     const lR = leg.selectAll("g").data(chartData).enter().append("g").attr("transform", (d, i) => `translate(0, ${i * 24})`).style("cursor", "pointer")
         .on("mouseover", function(e, d) {
             if (pinned) return;
@@ -713,7 +721,7 @@ function generateUnAgeDonut(data) {
         .on("click", (e, d) => pinned = pinned === d.label ? null : d.label);
 
     lR.append("rect").attr("width", 12).attr("height", 12).attr("rx", 3).attr("fill", d => color(d.label));
-    lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "10px").style("fill", "#334155").text(d => d.label);
+    lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "14px").style("fill", "#334155").text(d => d.label);
 }
 
 function generateUnJurisdictionBar(data) {
@@ -744,8 +752,8 @@ function generateUnJurisdictionBar(data) {
         .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
         .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
 
-    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "11px").style("fill", "#334155");
-    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "10px").style("fill", "#64748b");
+    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
+    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "12px").style("fill", "#64748b");
 }
 
 function generateUnLineChart(data) {
@@ -849,7 +857,7 @@ function generateMpAgeDonut(data) {
         .attr("fill", d => color(d.data.label)).attr("stroke", "#ffffff").style("stroke-width", "1px");
 
     let pinned = null;
-    const leg = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 30)`);
+    const leg = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 90)`);
     const lR = leg.selectAll("g").data(chartData).enter().append("g").attr("transform", (d, i) => `translate(0, ${i * 24})`).style("cursor", "pointer")
         .on("mouseover", function(e, d) {
             if (pinned) return;
@@ -863,7 +871,7 @@ function generateMpAgeDonut(data) {
         .on("click", (e, d) => pinned = pinned === d.label ? null : d.label);
 
     lR.append("rect").attr("width", 12).attr("height", 12).attr("rx", 3).attr("fill", d => color(d.label));
-    lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "10px").style("fill", "#334155").text(d => d.label);
+    lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "14px").style("fill", "#334155").text(d => d.label);
 }
 
 function generateMpJurisdictionBar(data) {
@@ -894,8 +902,8 @@ function generateMpJurisdictionBar(data) {
         .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
         .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
 
-    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "11px").style("fill", "#334155");
-    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "10px").style("fill", "#64748b");
+    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
+    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "12px").style("fill", "#64748b");
 }
 
 function generateMpLineChart(data) {
@@ -998,7 +1006,7 @@ function generateSpAgeDonut(data) {
         .attr("fill", d => color(d.data.label)).attr("stroke", "#ffffff").style("stroke-width", "1px");
 
     let pinned = null;
-    const leg = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 30)`);
+    const leg = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 90)`);
     const lR = leg.selectAll("g").data(chartData).enter().append("g").attr("transform", (d, i) => `translate(0, ${i * 24})`).style("cursor", "pointer")
         .on("mouseover", function(e, d) {
             if (pinned) return;
@@ -1012,7 +1020,7 @@ function generateSpAgeDonut(data) {
         .on("click", (e, d) => pinned = pinned === d.label ? null : d.label);
 
     lR.append("rect").attr("width", 12).attr("height", 12).attr("rx", 3).attr("fill", d => color(d.label));
-    lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "10px").style("fill", "#334155").text(d => d.label);
+    lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "14px").style("fill", "#334155").text(d => d.label);
 }
 
 function generateSpJurisdictionBar(data) {
@@ -1043,8 +1051,8 @@ function generateSpJurisdictionBar(data) {
         .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
         .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
 
-    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "11px").style("fill", "#334155");
-    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "10px").style("fill", "#64748b");
+    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
+    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "12px").style("fill", "#64748b");
 }
 
 function generateSpLineChart(data) {

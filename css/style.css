@@ -290,3 +290,20 @@ td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--t
     pointer-events: none;
     z-index: 1000;
 }
+/* ==========================================================================
+   HOMEPAGE SINGLE-PAGE GRID CONSISTENCY MATCH
+   ========================================================================== */
+@media (min-width: 1024px) {
+    /* Forces the homepage text wrapper block to occupy the full 2-column wide space */
+    #home-view .grid-chart-line {
+        grid-column: 2 / 4 !important;
+        grid-row: 1 / 3 !important; /* Stretches from top to bottom matching rows 1 & 2 */
+        height: 100% !important;
+    }
+
+    /* Adjusts the left container block holding your image to match the full height */
+    #home-view .grid-filters {
+        grid-row: 1 / 3 !important; /* Forces image column to stretch all the way down */
+        height: 100% !important;
+    }
+}
