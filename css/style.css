@@ -18,21 +18,18 @@
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* 1. LOCK THE VIEWPORT HEIGHT TO EXACTLY ONE PAGE */
 body {
     background-color: var(--bg-primary);
     color: var(--text-main);
-    height: 100vh;     /* Forces page to always be exactly screen height */
-    width: 100vw;      /* Forces page to always be exactly screen width */
-    overflow: hidden;  /* Strictly eliminates scrollbars */
+    height: 100vh;     
+    width: 100vw;      
+    overflow: hidden;  
     display: flex;
     flex-direction: column;
 }
 
-/* --- Top Navbar Styling --- */
 .navbar {
     background-color: var(--navbar-bg);
-    /* THE NAVBAR FIX: Centers the header content inline with the dashboard body below */
     padding: 0 max(24px, calc((100vw - 1500px) / 2)); 
     height: 60px;      
     display: flex;
@@ -77,18 +74,15 @@ body {
     color: white;
 }
 
-/* --- App Container (Centered with a Maximum Bound) --- */
 .app-container {
     flex: 1;           
-    padding: 24px 40px; /* Restores the breathability around the outer dashboard */
+    padding: 24px 40px; 
     overflow: hidden;  
     display: flex;
     flex-direction: column;
     width: 100%;
-    
-    /* THE FIX: Caps the dashboard width so it doesn't smash into the screen sides */
     max-width: 1550px; 
-    margin: 0 auto;    /* Perfectly centers the entire block layout on the monitor */
+    margin: 0 auto;    
 }
 
 .view-section {
@@ -103,34 +97,16 @@ body {
     display: flex;
 }
 
-/* --- Home Page Center Layout --- */
-.hero-card {
-    background: var(--card-bg);
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
-    margin: auto;      
-    max-width: 750px;
-    border: 1px solid var(--border-color);
-}
-
-/* ==========================================================================
-   THE UNCHANGED STRUCTURAL GRID (Responsive & Centered)
-   ========================================================================== */
-
 .dashboard-grid {
     display: grid;
-    /* COLUMN STRUCTURE: Kept exactly as designed */
     grid-template-columns: 260px 1fr 1fr;
-    /* ROW STRUCTURE: Automatically proportions itself dynamically based on display height */
-    grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr); 
+    grid-template-rows: 1fr 1fr; 
     gap: 16px;
     height: 100%;
     width: 100%;
     min-height: 0;     
 }
 
-/* Original structural placements left entirely intact */
 .grid-filters {
     grid-column: 1 / 2;
     grid-row: 1 / 2;
@@ -159,7 +135,6 @@ body {
     grid-row: 2 / 3;
 }
 
-/* Dashboard Panels Configuration */
 .filter-panel, .chart-wrapper {
     background: var(--card-bg);
     padding: 16px;
@@ -188,7 +163,6 @@ body {
     margin-bottom: 12px;
 }
 
-/* Internal Filter Layout Formats */
 .control-group {
     display: flex;
     flex-direction: column;
@@ -198,7 +172,6 @@ body {
 .control-group label { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .control-group select { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background-color: var(--bg-primary); color: var(--text-main); font-size: 0.85rem; width: 100%; }
 
-/* KPI Component Cards Setup */
 .kpi-card {
     width: 100%;
     flex: 1;           
@@ -214,7 +187,6 @@ body {
 .kpi-title { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
 .kpi-value { font-size: 1.6rem; font-weight: 700; color: var(--text-main); margin-top: 4px; }
 
-/* SVG Canvas Engine Fluidity Setup */
 .chart-container {
     flex: 1;
     position: relative;
@@ -233,7 +205,6 @@ body {
     height: 100%;
 }
 
-/* --- Records Table Page Tab --- */
 .table-wrapper {
     height: 100%;
     background: var(--card-bg);
@@ -255,9 +226,6 @@ table { width: 100%; border-collapse: collapse; text-align: left; }
 th { background-color: var(--bg-primary); padding: 10px; position: sticky; top: 0; z-index: 2; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; box-shadow: 0 1px 0 var(--border-color); }
 td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 0.85rem; }
 
-/* ==========================================================================
-   NAVIGATION DROPDOWN MENU CONFIGURATION
-   ========================================================================== */
 .nav-dropdown { position: relative; display: inline-block; }
 .dropdown-content {
     display: none;
@@ -278,7 +246,6 @@ td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--t
 .dropdown-content .nav-btn.active { background-color: #2563eb !important; color: #ffffff !important; }
 .dropdown-content .nav-btn.active:hover { background-color: #1d4ed8 !important; }
 
-/* Tooltip standard layer specs */
 .d3-tooltip {
     position: absolute;
     visibility: hidden;
@@ -290,20 +257,36 @@ td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--t
     pointer-events: none;
     z-index: 1000;
 }
-/* ==========================================================================
-   HOMEPAGE SINGLE-PAGE GRID CONSISTENCY MATCH
-   ========================================================================== */
+
 @media (min-width: 1024px) {
-    /* Forces the homepage text wrapper block to occupy the full 2-column wide space */
     #home-view .grid-chart-line {
         grid-column: 2 / 4 !important;
-        grid-row: 1 / 3 !important; /* Stretches from top to bottom matching rows 1 & 2 */
+        grid-row: 1 / 3 !important; 
         height: 100% !important;
     }
-
-    /* Adjusts the left container block holding your image to match the full height */
     #home-view .grid-filters {
-        grid-row: 1 / 3 !important; /* Forces image column to stretch all the way down */
+        grid-row: 1 / 3 !important; 
         height: 100% !important;
     }
 }
+
+/* 4-Box Structural Flex Layout Refinement Rules */
+#dashboard-view .visuals-grid-container {
+    grid-column: 2 / 4;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 100%;
+    min-height: 0;
+}
+.visuals-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    flex: 1;
+    min-height: 0;
+}
+.tile { transition: fill 0.15s, stroke 0.15s; }
+.d3-tooltip strong { color: #38bdf8; display: block; margin-bottom: 2px; }
+

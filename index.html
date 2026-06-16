@@ -17,7 +17,6 @@
             
             <div class="nav-dropdown">
                 <button class="nav-btn dropbtn">Enforcement Categories ▼</button>
-                
                 <div class="dropdown-content">
                     <button class="nav-btn" id="btn-seatbelts" onclick="switchView('seatbelts')">Seatbelt Analysis</button>
                     <button class="nav-btn" id="btn-unlicensed" onclick="switchView('unlicensed')">Unlicensed Driving</button>
@@ -34,7 +33,6 @@
 
         <section id="home-view" class="view-section active">
             <div class="dashboard-grid">
-                
                 <div class="filter-panel grid-filters" style="justify-content: center; align-items: center; overflow: hidden;">
                     <img src="./images/homepage_traffic.png" alt="Traffic Enforcement Representation" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
                 </div>
@@ -63,11 +61,10 @@
                         </ul>
                     </div>
                 </div>
-
             </div>
         </section>
 
-       <section id="dashboard-view" class="view-section">
+        <section id="dashboard-view" class="view-section">
             <div class="dashboard-grid">
                 
                 <div class="filter-panel grid-filters">
@@ -101,19 +98,28 @@
                     </div>
                 </div>
 
-                <div class="chart-wrapper grid-chart-1">
-                    <h3>Offence Violation Breakdown by Fines</h3>
-                    <div id="chartViolations" class="chart-container"></div>
-                </div>
-                
-                <div class="chart-wrapper grid-chart-2">
-                    <h3>Total Fines by Jurisdiction</h3>
-                    <div id="chartOutcomes" class="chart-container"></div>
-                </div>
+                <div class="visuals-grid-container">
+                    <div class="visuals-row">
+                        <div class="chart-wrapper line-box">
+                            <h3>Annual Fines Trend Analysis</h3>
+                            <div id="chartLine" class="chart-container"></div>
+                        </div>
+                        <div class="chart-wrapper heatmap-box">
+                            <h3>Regional Offence Intensity Mapping</h3>
+                            <div id="chartHeatmap" class="chart-container"></div>
+                        </div>
+                    </div>
 
-                <div class="chart-wrapper grid-chart-line">
-                    <h3>Annual Fines Trend Analysis</h3>
-                    <div id="chartLine" class="chart-container"></div>
+                    <div class="visuals-row">
+                        <div class="chart-wrapper donut-box">
+                            <h3>Offence Violation Breakdown by Fines</h3>
+                            <div id="chartViolations" class="chart-container"></div>
+                        </div>
+                        <div class="chart-wrapper bar-box">
+                            <h3>Total Fines by Jurisdiction</h3>
+                            <div id="chartOutcomes" class="chart-container"></div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -121,12 +127,9 @@
 
         <section id="seatbelts-view" class="view-section">
             <div class="dashboard-grid">
-                
                 <div class="filter-panel grid-filters">
                     <h3>Seatbelt Controls</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-                        This view is pre-filtered to strictly show data for "Non-wearing seatbelt" offences.
-                    </p>
+                    <p>This view is pre-filtered to strictly show data for "Non-wearing seatbelt" offences.</p>
                     <div class="control-group" style="margin-top: 15px;">
                         <label>State / Jurisdiction</label>
                         <select id="filter-sb-jurisdiction"><option value="all">All States</option></select>
@@ -166,18 +169,14 @@
                     <h3>Annual Seatbelt Fines Trend</h3>
                     <div id="chartSbLine" class="chart-container"></div>
                 </div>
-
             </div>
         </section>
 
         <section id="unlicensed-view" class="view-section">
             <div class="dashboard-grid">
-                
                 <div class="filter-panel grid-filters">
                     <h3>License Controls</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-                        Pre-filtered data for drivers operating vehicles without a valid or authorized license.
-                    </p>
+                    <p>Pre-filtered data for drivers operating vehicles without a valid or authorized license.</p>
                     <div class="control-group" style="margin-top: 15px;">
                         <label>State / Jurisdiction</label>
                         <select id="filter-un-jurisdiction"><option value="all">All States</option></select>
@@ -217,18 +216,14 @@
                     <h3>Annual Unlicensed Trend Analysis</h3>
                     <div id="chartUnLine" class="chart-container"></div>
                 </div>
-
             </div>
         </section>
 
         <section id="mobile-view" class="view-section">
             <div class="dashboard-grid">
-                
                 <div class="filter-panel grid-filters">
                     <h3>Mobile Controls</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-                        Pre-filtered data for drivers operating a vehicle while illegally using a mobile phone.
-                    </p>
+                    <p>Pre-filtered data for drivers operating a vehicle while illegally using a mobile phone.</p>
                     <div class="control-group" style="margin-top: 15px;">
                         <label>State / Jurisdiction</label>
                         <select id="filter-mp-jurisdiction"><option value="all">All States</option></select>
@@ -268,18 +263,14 @@
                     <h3>Annual Mobile Use Trend Analysis</h3>
                     <div id="chartMpLine" class="chart-container"></div>
                 </div>
-
             </div>
         </section>
 
         <section id="speed-view" class="view-section">
             <div class="dashboard-grid">
-                
                 <div class="filter-panel grid-filters">
                     <h3>Speeding Controls</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-                        Pre-filtered data for drivers exceeding the posted speed limit.
-                    </p>
+                    <p>Pre-filtered data for drivers exceeding the posted speed limit.</p>
                     <div class="control-group" style="margin-top: 15px;">
                         <label>State / Jurisdiction</label>
                         <select id="filter-sp-jurisdiction"><option value="all">All States</option></select>
@@ -319,7 +310,6 @@
                     <h3>Annual Speeding Trend Analysis</h3>
                     <div id="chartSpLine" class="chart-container"></div>
                 </div>
-
             </div>
         </section>
 

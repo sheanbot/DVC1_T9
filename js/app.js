@@ -371,3 +371,45 @@ window.addEventListener('resize', () => {
         else if (viewId === 'speed') runSpeedFilterCycle();
     }, 250); 
 });
+
+// ======================================================================
+// SHARED CONSTANTS: GLOBAL CROSS-FILTER INTERACTION ENGINE STATE
+// ======================================================================
+const ACTIVE_FILTERS = {
+    jurisdiction: 'all',
+    location: 'all',
+    metric: 'all'
+};
+
+/**
+ * Attaches real-time event tracking to dropdown select nodes.
+ * Run this function right after streaming your dataset from Output.csv
+ */
+function initializeFilterEventListeners() {
+    // 1. State / Jurisdiction Selector
+    const jurSelect = document.getElementById('filter-jurisdiction');
+    if (jurSelect) {
+        jurSelect.addEventListener('change', function() {
+            ACTIVE_FILTERS.jurisdiction = this.value; // Mutate shared state
+            runDataFilterCycle();                     // Kickstart rendering pipe
+        });
+    }
+
+    // 2. Geographic Location Selector
+    const locSelect = document.getElementById('filter-location');
+    if (locSelect) {
+        locSelect.addEventListener('change', function() {
+            ACTIVE_FILTERS.location = this.value;     // Mutate shared state
+            runDataFilterCycle();                     // Kickstart rendering pipe
+        });
+    }
+
+    // 3. Offence Metric Selector
+    const metSelect = document.getElementById('filter-metric');
+    if (metSelect) {
+        metSelect.addEventListener('change', function() {
+            ACTIVE_FILTERS.metric = this.value;       // Mutate shared state
+            runDataFilterCycle();                     // Kickstart rendering pipe
+        });
+    }
+}
