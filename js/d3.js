@@ -495,15 +495,23 @@ function generateSbJurisdictionBar(data) {
     const containerId = "#chartSbJurisdiction"; d3.select(containerId).selectAll("*").remove();
     const sum = {}; data.forEach(d => { if(d.jurisdiction !== 'Unknown') sum[d.jurisdiction] = (sum[d.jurisdiction] || 0) + d.fines; });
     let cD = Object.keys(sum).map(k => ({ j: k, f: sum[k] })).sort((a,b) => b.f - a.f); if (cD.length === 0) return;
-    const w = 450, h = 300, m = { top: 20, right: 40, bottom: 40, left: 120 };
+    
+    // FIX: Widened viewBox (550) and increased left margin (220) to fit full state names
+    const w = 550, h = 300, m = { top: 20, right: 40, bottom: 40, left: 220 };
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
     const x = d3.scaleLinear().domain([0, d3.max(cD, d => d.f)]).range([0, w - m.left - m.right]);
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
+    // FIX: Apply a custom 8-step Teal color gradient
+    const sbColors = ["#1b3e3f", "#2e388d", "#a32e55", "#3e2857", "#6ba8a9", "#928747", "#62cfcf", "#234747"];
+    const colorScale = d3.scaleOrdinal().range(sbColors);
+
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", 0).attr("fill", "#6ba8a9").attr("rx", 3)
+    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", 0)
+        .attr("fill", d => colorScale(d.j)) // Uses dynamic color instead of solid block
+        .attr("rx", 3)
         .transition().duration(800).ease(d3.easeCubicOut).delay((d,i) => i*60).attr("width", d => x(d.f))
         .on("end", function() {
             d3.select(this)
@@ -511,7 +519,8 @@ function generateSbJurisdictionBar(data) {
                 .on("mousemove", event => tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"))
                 .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
         });
-    svg.append("g").call(d3.axisLeft(y)); svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s")));
+    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
+    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "11px").style("fill", "#64748b");
 }
 
 function generateSbLineChart(data) {
@@ -610,15 +619,23 @@ function generateUnJurisdictionBar(data) {
     const containerId = "#chartUnJurisdiction"; d3.select(containerId).selectAll("*").remove();
     const sum = {}; data.forEach(d => { if(d.jurisdiction !== 'Unknown') sum[d.jurisdiction] = (sum[d.jurisdiction] || 0) + d.fines; });
     let cD = Object.keys(sum).map(k => ({ j: k, f: sum[k] })).sort((a,b) => b.f - a.f); if (cD.length === 0) return;
-    const w = 450, h = 300, m = { top: 20, right: 40, bottom: 40, left: 120 };
+    
+    // FIX: Adjusted margins to fit full state names
+    const w = 550, h = 300, m = { top: 20, right: 40, bottom: 40, left: 220 };
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
     const x = d3.scaleLinear().domain([0, d3.max(cD, d => d.f)]).range([0, w - m.left - m.right]);
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
+    // FIX: Apply a custom 8-step Cyan color gradient
+    const unColors = ["#003f5c", "#187c1d", "#719eaa", "#d16634", "#8d3778", "#00c8d7", "#ddf557", "#273264"];
+    const colorScale = d3.scaleOrdinal().range(unColors);
+
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", 0).attr("fill", "#0087a3").attr("rx", 3)
+    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", 0)
+        .attr("fill", d => colorScale(d.j)) // Uses dynamic color instead of solid block
+        .attr("rx", 3)
         .transition().duration(800).ease(d3.easeCubicOut).delay((d,i) => i*60).attr("width", d => x(d.f))
         .on("end", function() {
             d3.select(this)
@@ -626,7 +643,8 @@ function generateUnJurisdictionBar(data) {
                 .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
                 .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
         });
-    svg.append("g").call(d3.axisLeft(y)); svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s")));
+    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
+    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "11px").style("fill", "#64748b");
 }
 
 function generateUnLineChart(data) {
@@ -725,15 +743,23 @@ function generateMpJurisdictionBar(data) {
     const containerId = "#chartMpJurisdiction"; d3.select(containerId).selectAll("*").remove();
     const sum = {}; data.forEach(d => { if(d.jurisdiction !== 'Unknown') sum[d.jurisdiction] = (sum[d.jurisdiction] || 0) + d.fines; });
     let cD = Object.keys(sum).map(k => ({ j: k, f: sum[k] })).sort((a,b) => b.f - a.f); if (cD.length === 0) return;
-    const w = 450, h = 300, m = { top: 20, right: 40, bottom: 40, left: 120 };
+    
+    // FIX: Adjusted margins to fit full state names
+    const w = 550, h = 300, m = { top: 20, right: 40, bottom: 40, left: 220 };
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
     const x = d3.scaleLinear().domain([0, d3.max(cD, d => d.f)]).range([0, w - m.left - m.right]);
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
+    // FIX: Apply a custom 8-step Red color gradient
+    const mpColors = ["#61000b", "#0d0081", "#00a30e", "#b2c600", "#6e3840", "#cf32ff", "#ff6b52", "#5a97a7"];
+    const colorScale = d3.scaleOrdinal().range(mpColors);
+
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", 0).attr("fill", "#c4001c").attr("rx", 3)
+    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", 0)
+        .attr("fill", d => colorScale(d.j)) // Uses dynamic color instead of solid block
+        .attr("rx", 3)
         .transition().duration(800).ease(d3.easeCubicOut).delay((d,i) => i*60).attr("width", d => x(d.f))
         .on("end", function() {
             d3.select(this)
@@ -741,9 +767,9 @@ function generateMpJurisdictionBar(data) {
                 .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
                 .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
         });
-    svg.append("g").call(d3.axisLeft(y)); svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s")));
+    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
+    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "11px").style("fill", "#64748b");
 }
-
 function generateMpLineChart(data) {
     const containerId = "#chartMpLine"; d3.select(containerId).selectAll("*").remove();
     const sum = {}; for (let yr = 2008; yr <= 2024; yr++) { sum[String(yr)] = 0; }
@@ -840,15 +866,23 @@ function generateSpJurisdictionBar(data) {
     const containerId = "#chartSpJurisdiction"; d3.select(containerId).selectAll("*").remove();
     const sum = {}; data.forEach(d => { if(d.jurisdiction !== 'Unknown') sum[d.jurisdiction] = (sum[d.jurisdiction] || 0) + d.fines; });
     let cD = Object.keys(sum).map(k => ({ j: k, f: sum[k] })).sort((a,b) => b.f - a.f); if (cD.length === 0) return;
-    const w = 450, h = 300, m = { top: 20, right: 40, bottom: 40, left: 120 };
+    
+    // FIX: Adjusted margins to fit full state names
+    const w = 550, h = 300, m = { top: 20, right: 40, bottom: 40, left: 220 };
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
     const x = d3.scaleLinear().domain([0, d3.max(cD, d => d.f)]).range([0, w - m.left - m.right]);
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
+    // FIX: Apply a custom 8-step Blue color gradient
+    const spColors = ["#00153b", "#349787", "#003a82", "#96424d", "#d1a000", "#fc9089", "#669cff", "#385f52"];
+    const colorScale = d3.scaleOrdinal().range(spColors);
+
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", 0).attr("fill", "#004ca5").attr("rx", 3)
+    svg.selectAll("rect").data(cD).enter().append("rect").attr("y", d => y(d.j)).attr("height", y.bandwidth()).attr("width", 0)
+        .attr("fill", d => colorScale(d.j)) // Uses dynamic color instead of solid block
+        .attr("rx", 3)
         .transition().duration(800).ease(d3.easeCubicOut).delay((d,i) => i*60).attr("width", d => x(d.f))
         .on("end", function() {
             d3.select(this)
@@ -856,7 +890,8 @@ function generateSpJurisdictionBar(data) {
                 .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
                 .on("mouseout", function() { d3.select(this).attr("opacity", 1); tooltip.style("visibility", "hidden"); });
         });
-    svg.append("g").call(d3.axisLeft(y)); svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s")));
+    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
+    svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "11px").style("fill", "#64748b");
 }
 
 function generateSpLineChart(data) {
