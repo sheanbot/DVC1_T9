@@ -139,31 +139,62 @@ function generateOutcomesChart(data) {
     const container = d3.select(containerId);
     container.selectAll("*").remove();
 
+    // 1. Calculate Sum of Fines for each Jurisdiction
     const summary = {};
     data.forEach(item => {
         const key = item.jurisdiction;
-        if (key && key !== 'Unknown') summary[key] = (summary[key] || 0) + item.fines;
+        if (key && key !== 'Unknown') {
+            summary[key] = (summary[key] || 0) + item.fines;
+        }
     });
 
-    let chartData = Object.keys(summary).map(key => ({ jurisdiction: key, fines: summary[key] }));
+    let chartData = Object.keys(summary).map(key => ({
+        jurisdiction: key,
+        fines: summary[key]
+    }));
+
     if (chartData.length === 0) return;
+
+    // 2. Sort the bars from highest fines to lowest
     chartData.sort((a, b) => b.fines - a.fines);
 
-    const width = 450;
+    // FIX: Widened viewBox (550) and increased left margin (220) to fit full state names
+    const width = 550;
     const height = 300;
-    const margin = { top: 20, right: 30, bottom: 40, left: 120 }; 
+    const margin = { top: 20, right: 30, bottom: 40, left: 220 }; 
 
-    const svg = container.append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("width", "100%").attr("height", "100%").append("g").attr("transform", `translate(${margin.left}, ${margin.top})`);
+    const svg = container
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const x = d3.scaleLinear().domain([0, d3.max(chartData, d => d.fines) || 100]).nice().range([0, innerWidth]);
-    const y = d3.scaleBand().domain(chartData.map(d => d.jurisdiction)).range([0, innerHeight]).padding(0.25);
-    const colorScale = d3.scaleOrdinal(d3.schemeSet2);
+    const x = d3.scaleLinear()
+        .domain([0, d3.max(chartData, d => d.fines) || 100])
+        .nice()
+        .range([0, innerWidth]);
 
+    const y = d3.scaleBand()
+        .domain(chartData.map(d => d.jurisdiction))
+        .range([0, innerHeight])
+        .padding(0.25);
+
+    // FIX: Apply a custom 8-step Premium Dashboard Blue gradient
+    const dbColors = ["#082f49", "#0f4a73", "#1467a1", "#1985d1", "#22a3ff", "#5caeff", "#8cbaff", "#b8c9ff"];
+    const colorScale = d3.scaleOrdinal().range(dbColors);
+
+    // Create Tooltip Element in the DOM
     let tooltip = d3.select("body").select(".d3-tooltip");
-    if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
+    if (tooltip.empty()) {
+        tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
+    }
 
+    // 3. Draw the interactive bars
     const bars = svg.selectAll(".bar")
         .data(chartData)
         .enter()
@@ -172,8 +203,8 @@ function generateOutcomesChart(data) {
         .attr("y", d => y(d.jurisdiction))
         .attr("x", 0)
         .attr("height", y.bandwidth())
-        .attr("fill", d => colorScale(d.jurisdiction))
-        .attr("rx", 3)
+        .attr("fill", d => colorScale(d.jurisdiction)) // Applies the beautiful new gradient
+        .attr("rx", 3) 
         .style("cursor", "pointer")
         .attr("width", 0);
 
@@ -185,18 +216,34 @@ function generateOutcomesChart(data) {
         .on("end", function() {
             d3.select(this)
                 .on("mouseover", function(event, d) {
-                    d3.select(this).attr("opacity", 0.7);
-                    tooltip.style("visibility", "visible").html(`<strong>${d.jurisdiction}</strong><br/>Fines: $${d.fines.toLocaleString()}`);
+                    d3.select(this).attr("opacity", 0.7); 
+                    tooltip.style("visibility", "visible")
+                           .html(`<strong>${d.jurisdiction}</strong><br/>Fines: $${d.fines.toLocaleString()}`);
                 })
-                .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 20) + "px"); })
+                .on("mousemove", function(event) {
+                    tooltip.style("top", (event.pageY - 10) + "px")
+                           .style("left", (event.pageX + 20) + "px"); 
+                })
                 .on("mouseout", function() {
-                    d3.select(this).attr("opacity", 1);
+                    d3.select(this).attr("opacity", 1); 
                     tooltip.style("visibility", "hidden");
                 });
         });
 
-    svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("font-weight", "500").style("fill", "#334155");
-    svg.append("g").attr("transform", `translate(0, ${innerHeight})`).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("~s"))).style("font-size", "12px").style("fill", "#64748b");
+    // Draw Y Axis (Jurisdiction Names)
+    svg.append("g")
+        .call(d3.axisLeft(y))
+        .selectAll("text")
+        .style("font-size", "12px")
+        .style("font-weight", "500")
+        .style("fill", "#334155");
+
+    // Draw X Axis (Number of Fines)
+    svg.append("g")
+        .attr("transform", `translate(0, ${innerHeight})`)
+        .call(d3.axisBottom(x).ticks(5).tickFormat(d3.format("~s")))
+        .style("font-size", "12px")
+        .style("fill", "#64748b");
 }
 
 /**
@@ -446,13 +493,19 @@ function generateSbAgeDonut(data) {
     const width = 450, height = 300, radius = Math.min(width, height) / 2 - 20;
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`).append("g").attr("transform", `translate(${width / 2 - 70}, ${height / 2})`);
     
-    const color = d3.scaleOrdinal(d3.schemeSet3); const pie = d3.pie().value(d => d.value).sort(null);
+    // THE FIX: Premium 7-step Teal Color Palette for the Donut Chart
+    const sbDonutColors = ["#1b3e3f", "#2b5c5e", "#3c7b7d", "#4f9c9e", "#6ba8a9", "#8cc1c2", "#aedada"];
+    const color = d3.scaleOrdinal().range(sbDonutColors);
+    
+    const pie = d3.pie().value(d => d.value).sort(null);
     const arcFull = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.9);
     const arcHover = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.95);
 
     const cT = svg.append("text").attr("text-anchor", "middle").attr("dy", "-0.8em").style("font-size", "11px").style("fill", "#64748b").style("font-weight", "600").style("text-transform", "uppercase");
     const cV = svg.append("text").attr("text-anchor", "middle").attr("dy", "0.5em").style("font-size", "22px").style("fill", "#0f172a").style("font-weight", "bold");
-    const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#000000").style("font-weight", "700");
+    
+    // THE FIX: Changed the center percentage text color to match the Teal theme
+    const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#3c7b7d").style("font-weight", "700");
 
     function up(l, v) { cT.text(`Age: ${l}`); cV.text(v.toLocaleString()); cP.text(`${((v / total) * 100).toFixed(1)}% of Total`); }
     function cl() { cT.text(""); cV.text(""); cP.text(""); }
@@ -503,7 +556,7 @@ function generateSbJurisdictionBar(data) {
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
     // FIX: Apply a custom 8-step Teal color gradient
-    const sbColors = ["#1b3e3f", "#2e388d", "#a32e55", "#3e2857", "#6ba8a9", "#928747", "#62cfcf", "#234747"];
+    const sbColors = ["#1b3e3f", "#2b5c5e", "#3c7b7d", "#4f9c9e", "#6ba8a9", "#8cc1c2", "#aedada", "#d0f0f0"];
     const colorScale = d3.scaleOrdinal().range(sbColors);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
@@ -627,7 +680,7 @@ function generateUnJurisdictionBar(data) {
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
     // FIX: Apply a custom 8-step Cyan color gradient
-    const unColors = ["#003f5c", "#187c1d", "#719eaa", "#d16634", "#8d3778", "#00c8d7", "#ddf557", "#273264"];
+    const unColors = ["#003f5c", "#005878", "#007394", "#008fac", "#00abc3", "#00c8d7", "#00e5e8", "#00ffff"];
     const colorScale = d3.scaleOrdinal().range(unColors);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
@@ -751,7 +804,7 @@ function generateMpJurisdictionBar(data) {
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
     // FIX: Apply a custom 8-step Red color gradient
-    const mpColors = ["#61000b", "#0d0081", "#00a30e", "#b2c600", "#6e3840", "#cf32ff", "#ff6b52", "#5a97a7"];
+    const mpColors = ["#61000b", "#810013", "#a30018", "#c6001d", "#ea0022", "#ff3d32", "#ff6b52", "#ff9376"];
     const colorScale = d3.scaleOrdinal().range(mpColors);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
@@ -770,6 +823,8 @@ function generateMpJurisdictionBar(data) {
     svg.append("g").call(d3.axisLeft(y)).selectAll("text").style("font-size", "12px").style("fill", "#334155");
     svg.append("g").attr("transform", `translate(0, ${h-m.top-m.bottom})`).call(d3.axisBottom(x).ticks(4).tickFormat(d3.format("~s"))).style("font-size", "11px").style("fill", "#64748b");
 }
+
+
 function generateMpLineChart(data) {
     const containerId = "#chartMpLine"; d3.select(containerId).selectAll("*").remove();
     const sum = {}; for (let yr = 2008; yr <= 2024; yr++) { sum[String(yr)] = 0; }
@@ -874,7 +929,7 @@ function generateSpJurisdictionBar(data) {
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
     // FIX: Apply a custom 8-step Blue color gradient
-    const spColors = ["#00153b", "#349787", "#003a82", "#96424d", "#d1a000", "#fc9089", "#669cff", "#385f52"];
+    const spColors = ["#00153b", "#00275d", "#003a82", "#004ea8", "#0064d1", "#287dff", "#669cff", "#9ebcff"];
     const colorScale = d3.scaleOrdinal().range(spColors);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
