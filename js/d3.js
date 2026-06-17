@@ -394,7 +394,15 @@ function generateHeatmapChart(data) {
     const y = d3.scaleBand().domain(jurisdictions).range([innerHeight, 0]).padding(0.06);
 
     const maxVal = d3.max(chartData, d => d.value) || 1;
-    const colorScale = d3.scaleSequential().domain([0, maxVal]).interpolator(d3.interpolateBlues);
+    
+    // =======================================================
+    // THE FIX: High-Saturation Multi-Stop Color Scale
+    // =======================================================
+    const colorScale = d3.scaleLinear()
+        // Breakpoints at 0%, 5%, 30%, and 100% force smaller values to saturate quickly
+        .domain([0, maxVal * 0.05, maxVal * 0.3, maxVal])
+        // Color stops: Ice White -> Vivid Amber -> Crimson Red -> Deep Burgundy
+        .range(["#f8fafc", "#f59e0b", "#e11d48", "#4c0519"]);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) {
@@ -412,8 +420,7 @@ function generateHeatmapChart(data) {
         .attr("height", y.bandwidth())
         .attr("rx", 2)
         .style("cursor", "pointer")
-        // start visually muted for entrance animation
-        .attr("fill", "#f8fafc")
+        .attr("fill", "#f8fafc") // starts muted for entrance animation
         .attr("opacity", 0)
         .on("mouseover", function(event, d) {
             d3.select(this).interrupt()
@@ -439,7 +446,6 @@ function generateHeatmapChart(data) {
             tooltip.style("visibility", "hidden");
         });
 
-    // entrance transition: stagger by column then row for a pleasing wave
     tiles.transition()
         .duration(800)
         .delay((d, i) => {
@@ -449,6 +455,7 @@ function generateHeatmapChart(data) {
             return col * 50 + row * 30;
         })
         .ease(d3.easeCubicOut)
+        // Apply the vibrant color scale here!
         .attr("fill", d => d.value === 0 ? "#f8fafc" : colorScale(d.value))
         .attr("opacity", 1);
 
@@ -470,6 +477,7 @@ function generateHeatmapChart(data) {
         .style("font-weight", "600")
         .style("fill", "#475569");
 }
+
 // ======================================================================
 // ENFORCEMENT CATEGORIES SUB-PAGES ENGINES (WITH UPGRADED TWEEN ANIMATION)
 // ======================================================================
