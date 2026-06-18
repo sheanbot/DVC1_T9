@@ -593,17 +593,17 @@ function generateSbLineChart(data) {
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
     const x = d3.scalePoint().domain(cD.map(d => d.y)).range([0, w - m.left - m.right]).padding(0.15);
     const y = d3.scaleLinear().domain([0, d3.max(cD, d => d.v) || 100]).range([h - m.top - m.bottom, 0]);
-    const path = svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#ef4444").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
+    const path = svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#1b3e3f").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
     const len = path.node().getTotalLength(); path.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len).transition().duration(1000).attr("stroke-dashoffset", 0);
     
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("fill", "#ffffff").attr("stroke", "#ef4444").attr("r", 0)
+    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("fill", "#ffffff").attr("stroke", "#000000").attr("r", 0)
         .transition().delay(600).duration(400).attr("r", 4)
         .on("end", function() {
             d3.select(this)
-                .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#ef4444"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.year}</strong><br/>Fines: $${d.v.toLocaleString()}`); })
+                .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#3c8083"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.year}</strong><br/>Fines: $${d.v.toLocaleString()}`); })
                 .on("mousemove", event => tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px"))
                 .on("mouseout", function() { d3.select(this).attr("r", 4).attr("fill", "#ffffff"); tooltip.style("visibility", "hidden"); });
         });
@@ -717,17 +717,17 @@ function generateUnLineChart(data) {
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
     const x = d3.scalePoint().domain(cD.map(d => d.y)).range([0, w - m.left - m.right]).padding(0.15);
     const y = d3.scaleLinear().domain([0, d3.max(cD, d => d.v) || 100]).range([h - m.top - m.bottom, 0]);
-    const path = svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#9333ea").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
+    const path = svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#003f5c").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
     const len = path.node().getTotalLength(); path.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len).transition().duration(1000).attr("stroke-dashoffset", 0);
     
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
 
-    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("fill", "#ffffff").attr("stroke", "#9333ea").attr("r", 0)
+    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("fill", "#ffffff").attr("stroke", "#000000").attr("r", 0)
         .transition().delay(600).duration(400).attr("r", 4)
         .on("end", function() {
             d3.select(this)
-                .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#9333ea"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.year}</strong><br/>Fines: $${d.v.toLocaleString()}`); })
+                .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#266785"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.year}</strong><br/>Fines: $${d.v.toLocaleString()}`); })
                 .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px"); })
                 .on("mouseout", function() { d3.select(this).attr("r", 4).attr("fill", "#ffffff"); tooltip.style("visibility", "hidden"); });
         });
