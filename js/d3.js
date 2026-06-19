@@ -376,9 +376,9 @@ function generateHeatmapChart(data) {
     });
 
     // UNIFIED CARD BOX VIEWPORT PROPORTIONS
-    const width = 450;
+    const width = 550;
     const height = 300; 
-    const margin = { top: 15, right: 25, bottom: 65, left: 45 };
+    const margin = { top: 15, right: 25, bottom: 65, left: 200 };
 
     const svg = container.append("svg")
         .attr("viewBox", `0 0 ${width} ${height}`)
