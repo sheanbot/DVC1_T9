@@ -192,7 +192,7 @@ function runSeatbeltFilterCycle() {
 }
 
 // ==========================================
-// NEW: UNLICENSED PAGE PIPELINE
+// UNLICENSED PAGE PIPELINE
 // ==========================================
 function runUnlicensedFilterCycle() {
     const selectedState = document.getElementById('filter-un-jurisdiction').value;
