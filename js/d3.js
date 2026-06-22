@@ -502,7 +502,7 @@ function generateSbAgeDonut(data) {
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`).append("g").attr("transform", `translate(${width / 2 - 70}, ${height / 2})`);
     
     // THE FIX: Premium 7-step Teal Color Palette for the Donut Chart
-    const sbDonutColors = ["#1b3e3f", "#2b5c5e", "#3c7b7d", "#4f9c9e", "#6ba8a9", "#8cc1c2", "#aedada"];
+    const sbDonutColors = ["#ff2828ff", "#ff8d23ff", "#efff16ff", "#4f9c9e", "#1f4fffff", "#9429ceff", "#aed6daff"];
     const color = d3.scaleOrdinal().range(sbDonutColors);
     
     const pie = d3.pie().value(d => d.value).sort(null);
@@ -564,7 +564,7 @@ function generateSbJurisdictionBar(data) {
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
     // FIX: Apply a custom 8-step Teal color gradient
-    const sbColors = ["#1b3e3f", "#2b5c5e", "#3c7b7d", "#4f9c9e", "#6ba8a9", "#8cc1c2", "#aedada", "#d0f0f0"];
+    const sbColors = ["#ff2828ff", "#ff8d23ff", "#efff16ff", "#4f9c9e", "#1f4fffff", "#9429ceff", "#aed6daff"];
     const colorScale = d3.scaleOrdinal().range(sbColors);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
@@ -630,7 +630,7 @@ function generateUnAgeDonut(data) {
     const width = 450, height = 300, radius = Math.min(width, height) / 2 - 20;
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`).append("g").attr("transform", `translate(${width / 2 - 70}, ${height / 2})`);
     
-    const color = d3.scaleOrdinal().range(["#004c6d", "#006989", "#0087a3", "#00a6bb", "#00c6d0", "#00e7e2", "#00ffff"]);
+    const color = d3.scaleOrdinal().range(["#ff2828ff", "#ff8d23ff", "#efff16ff", "#4f9c9e", "#1f4fffff", "#9429ceff", "#aed6daff"]);
     const pie = d3.pie().value(d => d.value).sort(null);
     const arcFull = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.9);
     const arcHover = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.95);
@@ -688,7 +688,7 @@ function generateUnJurisdictionBar(data) {
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
     // FIX: Apply a custom 8-step Cyan color gradient
-    const unColors = ["#003f5c", "#005878", "#007394", "#008fac", "#00abc3", "#00c8d7", "#00e5e8", "#00ffff"];
+    const unColors = ["#ff2828ff", "#ff8d23ff", "#efff16ff", "#4f9c9e", "#1f4fffff", "#9429ceff", "#aed6daff"];
     const colorScale = d3.scaleOrdinal().range(unColors);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
@@ -754,7 +754,7 @@ function generateMpAgeDonut(data) {
     const width = 450, height = 300, radius = Math.min(width, height) / 2 - 20;
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`).append("g").attr("transform", `translate(${width / 2 - 70}, ${height / 2})`);
     
-    const color = d3.scaleOrdinal().range(["#7a0010", "#9e0018", "#c4001c", "#ea0d1e", "#ff4b38", "#ff7656", "#ffa67c"]);
+    const color = d3.scaleOrdinal().range(["#ff2828ff", "#ff8d23ff", "#efff16ff", "#4f9c9e", "#1f4fffff", "#9429ceff", "#aed6daff"]);
     const pie = d3.pie().value(d => d.value).sort(null);
     const arcFull = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.9);
     const arcHover = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.95);
@@ -812,7 +812,7 @@ function generateMpJurisdictionBar(data) {
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
     // FIX: Apply a custom 8-step Red color gradient
-    const mpColors = ["#61000b", "#810013", "#a30018", "#c6001d", "#ea0022", "#ff3d32", "#ff6b52", "#ff9376"];
+    const mpColors = ["#ff2828ff", "#ff8d23ff", "#efff16ff", "#4f9c9e", "#1f4fffff", "#9429ceff", "#aed6daff"];
     const colorScale = d3.scaleOrdinal().range(mpColors);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
@@ -879,7 +879,7 @@ function generateSpAgeDonut(data) {
     const width = 450, height = 300, radius = Math.min(width, height) / 2 - 20;
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${width} ${height}`).append("g").attr("transform", `translate(${width / 2 - 70}, ${height / 2})`);
     
-    const color = d3.scaleOrdinal().range(["#002051", "#00357a", "#004ca5", "#0065d2", "#2b7fff", "#6b9bff", "#a1b8ff"]);
+    const color = d3.scaleOrdinal().range(["#ff2828ff", "#ff8d23ff", "#efff16ff", "#4f9c9e", "#1f4fffff", "#9429ceff", "#aed6daff"]);
     const pie = d3.pie().value(d => d.value).sort(null);
     const arcZero = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.65);
     const arcFull = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.9);
@@ -937,7 +937,7 @@ function generateSpJurisdictionBar(data) {
     const y = d3.scaleBand().domain(cD.map(d => d.j)).range([0, h - m.top - m.bottom]).padding(0.35);
     
     // FIX: Apply a custom 8-step Blue color gradient
-    const spColors = ["#00153b", "#00275d", "#003a82", "#004ea8", "#0064d1", "#287dff", "#669cff", "#9ebcff"];
+    const spColors = ["#ff2828ff", "#ff8d23ff", "#efff16ff", "#4f9c9e", "#1f4fffff", "#9429ceff", "#aed6daff"];
     const colorScale = d3.scaleOrdinal().range(spColors);
 
     let tooltip = d3.select("body").select(".d3-tooltip");
