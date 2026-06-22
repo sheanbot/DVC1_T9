@@ -49,6 +49,9 @@ function generateViolationsChart(data) {
 
     const arcData = pie(chartData);
 
+    // Track state of clicked slice
+    let activeSelection = null;
+
     const centerTitle = svg.append("text").attr("text-anchor", "middle").attr("dy", "-0.8em").style("font-size", "11px").style("fill", "#64748b").style("font-weight", "600").style("text-transform", "uppercase"); 
     const centerValue = svg.append("text").attr("text-anchor", "middle").attr("dy", "0.5em").style("font-size", "22px").style("fill", "#0f172a").style("font-weight", "bold"); 
     const centerPct = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#000000").style("font-weight", "700");
@@ -59,7 +62,11 @@ function generateViolationsChart(data) {
         centerPct.text(`${((value / totalFines) * 100).toFixed(1)}% of Total`);
     }
 
-    function clearCenterText() { centerTitle.text(""); centerValue.text(""); centerPct.text(""); }
+    function clearCenterText() { 
+        centerTitle.text(""); 
+        centerValue.text(""); 
+        centerPct.text(""); 
+    }
 
     const slices = svg.selectAll("path")
         .data(arcData)
@@ -68,31 +75,56 @@ function generateViolationsChart(data) {
         .attr("fill", d => color(d.data.label))
         .attr("stroke", "#ffffff")
         .style("stroke-width", "1px")
-        .style("transition", "opacity 0.2s, stroke-width 0.2s")// Smooth CSS scaling
+        .style("cursor", "pointer")
         .each(function(d) { this._current = { startAngle: d.startAngle, endAngle: d.startAngle }; });
 
-    // FIX: Simplified hover mechanics that won't break the browser DOM tracking
-    function highlightSlice(dLabel, dValue) {
+    function highlightSlice(dLabel, dValue, isClick = false) {
+        // If something is locked by a click and this is just a generic hover, don't interrupt it
+        if (activeSelection && !isClick && activeSelection !== dLabel) return;
+
         legendRows.select("text").style("font-weight", "500").style("fill", "#334155");
         legendRows.filter(d => d.label === dLabel).select("text").style("font-weight", "bold").style("fill", "#0f172a");
         
-        slices.attr("opacity", 0.15).attr("d", arc).attr("stroke", "#ffffff").style("stroke-width", "1px"); 
+        slices.interrupt().transition().duration(200)
+            .attr("opacity", 0.15)
+            .attr("d", arc)
+            .attr("stroke", "#ffffff")
+            .style("stroke-width", "1px"); 
         
         slices.filter(sliceData => sliceData.data.label === dLabel)
-              .attr("opacity", 1)
-              .attr("d", arcHover)
-              .attr("stroke", color(dLabel))
-              .style("stroke-width", "4px"); 
+            .interrupt().transition().duration(200)
+            .attr("opacity", 1)
+            .attr("d", arcHover)
+            .attr("stroke", color(dLabel))
+            .style("stroke-width", "3px"); 
               
         updateCenterText(dLabel, dValue); 
     }
 
-    function resetAll() {
+    function resetAll(force = false) {
+        // Prevent mouseout clear if an item is locked by click selection
+        if (activeSelection && !force) return;
+
         legendRows.select("text").style("font-weight", "500").style("fill", "#334155");
-        slices.attr("opacity", 1).attr("d", arc).attr("stroke", "#ffffff").style("stroke-width", "1px");
+        slices.interrupt().transition().duration(200)
+            .attr("opacity", 1)
+            .attr("d", arc)
+            .attr("stroke", "#ffffff")
+            .style("stroke-width", "1px");
         clearCenterText(); 
     }
 
+    function handleToggleClick(dLabel, dValue) {
+        if (activeSelection === dLabel) {
+            activeSelection = null; // Deselect if clicking the active item again
+            resetAll(true);
+        } else {
+            activeSelection = dLabel; // Lock selection
+            highlightSlice(dLabel, dValue, true);
+        }
+    }
+
+    // Initial Entry Animation Sequence
     slices.transition()
         .duration(1000)
         .ease(d3.easeExpOut)
@@ -102,9 +134,11 @@ function generateViolationsChart(data) {
             return function(t) { return arc(interpolate(t)); };
         })
         .on("end", function() {
+            // Bind interaction handlers safely after creation
             d3.select(this)
                 .on("mouseover", function(event, d) { highlightSlice(d.data.label, d.data.value); })
-                .on("mouseout", function() { resetAll(); });
+                .on("mouseout", function() { resetAll(); })
+                .on("click", function(event, d) { handleToggleClick(d.data.label, d.data.value); });
         });
 
     const legend = container.select("svg").append("g").attr("transform", `translate(${width - 150}, 100)`);
@@ -112,7 +146,8 @@ function generateViolationsChart(data) {
         .data(chartData).enter().append("g").attr("class", "legend-row")
         .attr("transform", (d, i) => `translate(0, ${i * 24})`).style("cursor", "pointer")
         .on("mouseover", function(event, d) { highlightSlice(d.label, d.value); })
-        .on("mouseout", function() { resetAll(); });
+        .on("mouseout", function() { resetAll(); })
+        .on("click", function(event, d) { handleToggleClick(d.label, d.value); });
 
     legendRows.append("rect").attr("width", 12).attr("height", 12).attr("rx", 3).attr("fill", d => color(d.label));
     legendRows.append("text").attr("x", 20).attr("y", 10).style("font-size", "13px").style("fill", "#334155").style("font-weight", "500")

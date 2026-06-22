@@ -26,6 +26,9 @@ function generateMpAgeDonut(data) {
     const arcFull = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.9);
     const arcHover = d3.arc().innerRadius(radius * 0.65).outerRadius(radius * 0.95);
 
+    // FIX: Track active click state
+    let activeSelection = null;
+
     const cT = svg.append("text").attr("text-anchor", "middle").attr("dy", "-0.8em").style("font-size", "11px").style("fill", "#64748b").style("font-weight", "600").style("text-transform", "uppercase");
     const cV = svg.append("text").attr("text-anchor", "middle").attr("dy", "0.5em").style("font-size", "22px").style("fill", "#0f172a").style("font-weight", "bold");
     const cP = svg.append("text").attr("text-anchor", "middle").attr("dy", "2.2em").style("font-size", "12px").style("fill", "#000000").style("font-weight", "700");
@@ -36,33 +39,51 @@ function generateMpAgeDonut(data) {
     const slices = svg.selectAll("path").data(pie(cD)).enter().append("path").attr("fill", d => color(d.data.label)).attr("stroke", "#ffffff").style("stroke-width", "1px").style("transition", "opacity 0.2s, stroke-width 0.2s")
         .each(function(d) { this._current = { startAngle: d.startAngle, endAngle: d.startAngle }; });
     
-    function highlight(dL, dV) {
+    function highlight(dL, dV, isClick = false) {
+        // Stop casual hovers from disrupting a click-locked slice
+        if (activeSelection && !isClick && activeSelection !== dL) return;
+
         lR.select("text").style("font-weight", "500").style("fill", "#334155");
         lR.filter(ld => ld.label === dL).select("text").style("font-weight", "bold").style("fill", "#0f172a");
-        slices.attr("opacity", 0.15).attr("d", arcFull).attr("stroke", "#ffffff").style("stroke-width", "1px");
-        slices.filter(sd => sd.data.label === dL).attr("opacity", 1).attr("d", arcHover).attr("stroke", color(dL)).style("stroke-width", "4px"); 
+        slices.interrupt().transition().duration(200).attr("opacity", 0.15).attr("d", arcFull).attr("stroke", "#ffffff").style("stroke-width", "1px");
+        slices.filter(sd => sd.data.label === dL).interrupt().transition().duration(200).attr("opacity", 1).attr("d", arcHover).attr("stroke", color(dL)).style("stroke-width", "4px"); 
         up(dL, dV);
     }
     
-    function reset() { 
+    function reset(force = false) { 
+        if (activeSelection && !force) return;
         lR.select("text").style("font-weight", "500").style("fill", "#334155"); 
-        slices.attr("opacity", 1).attr("d", arcFull).attr("stroke", "#ffffff").style("stroke-width", "1px"); 
+        slices.interrupt().transition().duration(200).attr("opacity", 1).attr("d", arcFull).attr("stroke", "#ffffff").style("stroke-width", "1px"); 
         cl(); 
     }
+
+    function handleToggleClick(dL, dV) {
+        if (activeSelection === dL) {
+            activeSelection = null;
+            reset(true);
+        } else {
+            activeSelection = dL;
+            highlight(dL, dV, true);
+        }
+    }
+
+    // Attach interactions seamlessly
+    slices.on("mouseover", function(e, d) { highlight(d.data.label, d.data.value); })
+          .on("mouseout", function() { reset(); })
+          .on("click", function(e, d) { handleToggleClick(d.data.label, d.data.value); });
 
     slices.transition().duration(1000).ease(d3.easeExpOut).attrTween("d", function(d) {
             const interpolate = d3.interpolate(this._current, d);
             this._current = interpolate(0);
             return function(t) { return arcFull(interpolate(t)); };
-        })
-        .on("end", function() {
-            d3.select(this).on("mouseover", function(e, d) { highlight(d.data.label, d.data.value); }).on("mouseout", function() { reset(); });
         });
 
+    // Kept at exactly 90 variant coordinates
     const leg = d3.select(containerId).select("svg").append("g").attr("transform", `translate(${width - 150}, 90)`);
     const lR = leg.selectAll("g").data(cD).enter().append("g").attr("transform", (d, i) => `translate(0, ${i * 24})`).style("cursor", "pointer")
         .on("mouseover", function(e, d) { highlight(d.label, d.value); })
-        .on("mouseout", function() { reset(); });
+        .on("mouseout", function() { reset(); })
+        .on("click", function(e, d) { handleToggleClick(d.label, d.value); });
 
     lR.append("rect").attr("width", 12).attr("height", 12).attr("rx", 3).attr("fill", d => color(d.label));
     lR.append("text").attr("x", 20).attr("y", 10).style("font-size", "13px").style("fill", "#334155").text(d => d.label);
