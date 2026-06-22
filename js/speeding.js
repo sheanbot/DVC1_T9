@@ -128,14 +128,14 @@ function generateSpLineChart(data) {
     const svg = d3.select(containerId).append("svg").attr("viewBox", `0 0 ${w} ${h}`).append("g").attr("transform", `translate(${m.left}, ${m.top})`);
     const x = d3.scalePoint().domain(cD.map(d => d.y)).range([0, w - m.left - m.right]).padding(0.15); 
     const y = d3.scaleLinear().domain([0, d3.max(cD, d => d.v) || 100]).range([h - m.top - m.bottom, 0]);
-    const path = svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#4338ca").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
+    const path = svg.append("path").datum(cD).attr("fill", "none").attr("stroke", "#000000ff").attr("stroke-width", 3).attr("d", d3.line().x(d => x(d.y)).y(d => y(d.v)).curve(d3.curveMonotoneX));
     const len = path.node().getTotalLength(); path.attr("stroke-dasharray", `${len} ${len}`).attr("stroke-dashoffset", len).transition().duration(1000).attr("stroke-dashoffset", 0);
     
     let tooltip = d3.select("body").select(".d3-tooltip");
     if (tooltip.empty()) tooltip = d3.select("body").append("div").attr("class", "d3-tooltip");
     
-    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("fill", "#ffffff").attr("stroke", "#4338ca").attr("stroke-width", 2).style("cursor", "pointer")
-        .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#4338ca"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.y}</strong><br/>Fines: $${d.v.toLocaleString()}`); })
+    svg.selectAll("circle").data(cD).enter().append("circle").attr("cx", d => x(d.y)).attr("cy", d => y(d.v)).attr("fill", "#ffffffff").attr("stroke", "#000000ff").attr("stroke-width", 2).style("cursor", "pointer")
+        .on("mouseover", function(event, d) { d3.select(this).attr("r", 7).attr("fill", "#ffffffff"); tooltip.style("visibility", "visible").html(`<strong>Year: ${d.y}</strong><br/>Fines: $${d.v.toLocaleString()}`); })
         .on("mousemove", function(event) { tooltip.style("top", (event.pageY - 15) + "px").style("left", (event.pageX + 15) + "px"); })
         .on("mouseout", function() { d3.select(this).attr("r", 4).attr("fill", "#ffffff"); tooltip.style("visibility", "hidden"); })
         .attr("r", 0).transition().delay(600).duration(400).attr("r", 4);
