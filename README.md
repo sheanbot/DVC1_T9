@@ -25,7 +25,11 @@ DVC1_T9/
 │   └── style.css          # Styling for the dashboard
 ├── js/
 │   ├── app.js             # Main JavaScript application logic
-│   └── d3.js              # D3.js visualization library
+│   └── dashboard-main.js 
+|   └── mobile.js 
+|   └── seatbelt.js 
+|   └── speeding.js 
+|   └── unlicensed.js           
 └── data/
     ├── police_enforcement_2024_fines.csv  # Main dataset with enforcement records
     └── Output.csv                          # Processed/output data

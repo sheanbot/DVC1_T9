@@ -136,10 +136,14 @@ function populateUISelect(elementId, items) {
             let cleanText = item.replace(/_/g, ' ');
             
             // 2. Transform the text to Title Case (Capitalize each word)
+            // 2. Transform the text to Title Case (Capitalize each word)
             let formattedText = cleanText.split(' ')
                                          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                                          .join(' ');
             
+            // 3. Force uppercase for anything inside parentheses (e.g. "(nsw)" -> "(NSW)")
+            formattedText = formattedText.replace(/\((.*?)\)/g, match => match.toUpperCase());
+
             el.textContent = formattedText;
             select.appendChild(el);
         }

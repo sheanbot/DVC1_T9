@@ -290,3 +290,20 @@ td { padding: 10px; border-bottom: 1px solid var(--border-color); color: var(--t
 .tile { transition: fill 0.15s, stroke 0.15s; }
 .d3-tooltip strong { color: #38bdf8; display: block; margin-bottom: 2px; }
 
+/* =========================================================
+   D3.js Global Axis Styling 
+   ========================================================= */
+
+/* 1. Make the main X and Y axis lines thin and prevent blocky fills */
+.chart-container svg .domain {
+    fill: none !important;          /* <-- This stops the thick blocky fill bug! */
+    stroke-width: 1px !important;   /* Forces a clean, thin line */
+    stroke: #94a3b8 !important;     /* A premium slate gray color */
+}
+
+/* 2. Soften the little tick marks protruding from the axis */
+.chart-container svg .tick line {
+    fill: none !important;
+    stroke-width: 1px !important;
+    stroke: #cbd5e1 !important;     
+}
